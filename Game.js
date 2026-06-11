@@ -1,14 +1,12 @@
 /**
  * 🪄 Arcane Academy - Core Game Engine
- * Stable Version
  */
 
 import Input from "./Input.js";
 import SceneManager from "./SceneManager.js";
 import GameState from "./GameState.js";
 import HUD from "./HUD.js";
-
-import AcademyScene from "../scenes/AcademyScene.js";
+import AcademyScene from "./AcademyScene.js";
 
 export default class Game {
   constructor(canvas) {
@@ -18,32 +16,29 @@ export default class Game {
     // 🎮 Core Systems
     this.input = new Input();
     this.sceneManager = new SceneManager();
-
-    // 🧠 Global State
     this.gameState = new GameState();
-
-    // 🖥️ HUD
     this.hud = new HUD();
 
-    // ⏱️ Time Tracking
+    // ⏱️ Timing
     this.lastTime = 0;
 
-    // 🎬 Register Scene
+    // 🎬 Create Scene
     const academyScene = new AcademyScene(this);
 
+    // Register Scene
     this.sceneManager.addScene(
       "academy",
       academyScene
     );
 
-    // 🚀 Start Scene
+    // Start Scene
     this.sceneManager.start("academy");
 
     console.log("🪄 Arcane Academy Engine Started");
   }
 
   /**
-   * 🚀 Start Game Loop
+   * 🚀 Start Game
    */
   start() {
     requestAnimationFrame(this.loop);
@@ -66,44 +61,47 @@ export default class Game {
    * 🧠 Update
    */
   update(deltaTime) {
-    if (this.gameState.state === "paused") {
-      return;
+    try {
+      if (this.gameState?.state === "paused") return;
+      if (this.gameState?.state === "gameover") return;
+
+      this.sceneManager.update(deltaTime);
+
+      if (this.gameState?.update) {
+        this.gameState.update();
+      }
+
+      if (this.hud?.update) {
+        this.hud.update();
+      }
+
+      if (this.input?.update) {
+        this.input.update();
+      }
+    } catch (err) {
+      console.error("❌ Update Error:", err);
     }
-
-    if (this.gameState.state === "gameover") {
-      return;
-    }
-
-    // Scene
-    this.sceneManager.update(deltaTime);
-
-    // Global State
-    this.gameState.update();
-
-    // HUD
-    this.hud.update();
-
-    // Input Cleanup
-    this.input.update();
   }
 
   /**
    * 🎨 Render
    */
   render() {
-    // Background
-    this.ctx.fillStyle = "#05070d";
-    this.ctx.fillRect(
-      0,
-      0,
-      this.canvas.width,
-      this.canvas.height
-    );
+    try {
+      // Background
+      this.ctx.fillStyle = "#0b0f1a";
+      this.ctx.fillRect(
+        0,
+        0,
+        this.canvas.width,
+        this.canvas.height
+      );
 
-    // Active Scene
-    this.sceneManager.render(this.ctx);
+      // Scene
+      this.sceneManager.render(this.ctx);
 
-    // HUD Overlay
-    this.hud.render(this.ctx);
+    } catch (err) {
+      console.error("❌ Render Error:", err);
+    }
   }
 }
