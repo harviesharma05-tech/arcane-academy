@@ -1,27 +1,33 @@
 /**
- * 🎮 Arcane Academy - Game State Manager
- * Single source of truth for entire game
+ * 🧠 Arcane Academy - Global Game State
+ * Tracks overall game status
  */
 
 export default class GameState {
-  constructor(player, enemy) {
+  constructor(player = null, enemy = null) {
     this.player = player;
     this.enemy = enemy;
 
-    this.state = "playing"; 
     // playing | paused | gameover
+    this.state = "playing";
   }
 
   /**
-   * 🔁 Update global rules
+   * 🔁 Update game state
    */
   update() {
+    // Safety checks
+    if (!this.player || !this.enemy) return;
+
+    // Player dead
     if (this.player.hp <= 0) {
       this.state = "gameover";
+      console.log("💀 Game Over");
     }
 
+    // Enemy dead
     if (this.enemy.hp <= 0) {
-      this.enemy.hp = this.enemy.maxHP;
+      console.log("🏆 Enemy Defeated");
     }
   }
 
@@ -40,9 +46,9 @@ export default class GameState {
   }
 
   /**
-   * 💀 Game over check
+   * 🔄 Restart state
    */
-  isGameOver() {
-    return this.state === "gameover";
+  reset() {
+    this.state = "playing";
   }
 }
