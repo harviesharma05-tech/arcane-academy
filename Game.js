@@ -20,12 +20,12 @@ export default class Game {
     this.sceneManager = new SceneManager();
 
     // 🧠 Global State
-    this.gameState = new GameState(null, null);
+    this.gameState = new GameState();
 
     // 🖥️ HUD
-    this.hud = new HUD(null);
+    this.hud = new HUD();
 
-    // ⏱️ Timing
+    // ⏱️ Time Tracking
     this.lastTime = 0;
 
     // 🎬 Register Scene
@@ -36,7 +36,7 @@ export default class Game {
       academyScene
     );
 
-    // 🚀 Start Scene System
+    // 🚀 Start Scene
     this.sceneManager.start("academy");
 
     console.log("🪄 Arcane Academy Engine Started");
@@ -63,41 +63,35 @@ export default class Game {
   };
 
   /**
-   * 🧠 Update Systems
+   * 🧠 Update
    */
   update(deltaTime) {
-    // Pause
     if (this.gameState.state === "paused") {
       return;
     }
 
-    // Game Over
     if (this.gameState.state === "gameover") {
       return;
     }
 
-    // 🎬 Active Scene
+    // Scene
     this.sceneManager.update(deltaTime);
 
-    // 🧠 State
+    // Global State
     this.gameState.update();
 
-    // 🖥️ HUD
-    if (this.hud.update) {
-      this.hud.update();
-    }
+    // HUD
+    this.hud.update();
 
-    // ⌨️ Input Cleanup
-    if (this.input.update) {
-      this.input.update();
-    }
+    // Input Cleanup
+    this.input.update();
   }
 
   /**
    * 🎨 Render
    */
   render() {
-    // Clear Screen
+    // Background
     this.ctx.fillStyle = "#05070d";
     this.ctx.fillRect(
       0,
@@ -106,12 +100,10 @@ export default class Game {
       this.canvas.height
     );
 
-    // Scene
+    // Active Scene
     this.sceneManager.render(this.ctx);
 
-    // HUD
-    if (this.hud.render) {
-      this.hud.render(this.ctx);
-    }
+    // HUD Overlay
+    this.hud.render(this.ctx);
   }
 }
