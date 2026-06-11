@@ -1,5 +1,6 @@
 /**
- * 🪄 Arcane Academy - Player Entity
+ * 🪄 Arcane Academy - Player Entity (PHASE 4)
+ * Movement + HP + Mana + XP + Level System
  */
 
 export default class Player {
@@ -25,6 +26,10 @@ export default class Player {
     // Progression
     this.level = 1;
     this.xp = 0;
+    this.xpToNextLevel = 100;
+
+    // Inventory
+    this.inventory = [];
 
     // State
     this.isShielded = false;
@@ -34,12 +39,25 @@ export default class Player {
    * 🔁 Update
    */
   update(input) {
+    this.handleMovement(input);
+    this.regenerateMana();
+    this.applyBoundaries();
+  }
+
+  /**
+   * ⌨️ Movement
+   */
+  handleMovement(input) {
     if (input.isDown("w")) this.y -= this.speed;
     if (input.isDown("s")) this.y += this.speed;
     if (input.isDown("a")) this.x -= this.speed;
     if (input.isDown("d")) this.x += this.speed;
+  }
 
-    // Screen boundaries
+  /**
+   * 🧱 Screen Boundaries
+   */
+  applyBoundaries() {
     this.x = Math.max(
       0,
       Math.min(window.innerWidth - this.size, this.x)
@@ -49,10 +67,18 @@ export default class Player {
       0,
       Math.min(window.innerHeight - this.size, this.y)
     );
+  }
 
-    // Mana regeneration
+  /**
+   * 🔋 Mana Regen
+   */
+  regenerateMana() {
     if (this.mana < this.maxMana) {
       this.mana += 0.05;
+
+      if (this.mana > this.maxMana) {
+        this.mana = this.maxMana;
+      }
     }
   }
 
@@ -84,26 +110,43 @@ export default class Player {
   }
 
   /**
-   * ⭐ XP
+   * ⭐ XP System
    */
   gainXP(amount) {
     this.xp += amount;
 
-    if (this.xp >= 100) {
+    while (this.xp >= this.xpToNextLevel) {
+      this.xp -= this.xpToNextLevel;
+
       this.level++;
-      this.xp = 0;
+
+      // Rewards
+      this.maxHP += 20;
+      this.maxMana += 20;
+
+      this.hp = this.maxHP;
+      this.mana = this.maxMana;
+
+      this.xpToNextLevel += 50;
 
       console.log(
-        `⭐ Level Up! Level ${this.level}`
+        `⭐ LEVEL UP! Now Level ${this.level}`
       );
     }
+  }
+
+  /**
+   * 🎒 Inventory
+   */
+  addItem(item) {
+    this.inventory.push(item);
   }
 
   /**
    * 🎨 Render
    */
   render(ctx) {
-    // Player body
+    // Player Body
     ctx.fillStyle = this.isShielded
       ? "lightblue"
       : this.color;
@@ -115,7 +158,7 @@ export default class Player {
       this.size
     );
 
-    // White border
+    // Border
     ctx.strokeStyle = "white";
     ctx.lineWidth = 2;
 
@@ -130,7 +173,7 @@ export default class Player {
     ctx.fillStyle = "red";
     ctx.fillRect(
       this.x,
-      this.y - 12,
+      this.y - 15,
       this.size,
       5
     );
@@ -138,7 +181,7 @@ export default class Player {
     ctx.fillStyle = "lime";
     ctx.fillRect(
       this.x,
-      this.y - 12,
+      this.y - 15,
       this.size * (this.hp / this.maxHP),
       5
     );
@@ -147,19 +190,19 @@ export default class Player {
     ctx.fillStyle = "#38bdf8";
     ctx.fillRect(
       this.x,
-      this.y - 20,
+      this.y - 22,
       this.size * (this.mana / this.maxMana),
       4
     );
 
-    // Label
+    // Level Text
     ctx.fillStyle = "white";
     ctx.font = "12px Arial";
 
     ctx.fillText(
       `Lv ${this.level}`,
       this.x,
-      this.y - 28
+      this.y - 30
     );
   }
 }
