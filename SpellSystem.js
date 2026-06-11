@@ -1,27 +1,26 @@
 /**
- * 🪄 Arcane Academy - Spell System
- * Stable Version
+ * 🪄 Arcane Academy - Spell System (PHASE 4)
+ * Fireball + Shield + Cooldowns + Projectile Integration
  */
 
 export default class SpellSystem {
-  constructor(player, enemy, projectileSystem = null, progressionSystem = null) {
+  constructor(player, enemy, projectileSystem) {
     this.player = player;
     this.enemy = enemy;
 
+    // 💥 Projectile System
     this.projectiles = projectileSystem;
-    this.progression = progressionSystem;
 
+    // 🪄 Spell Database
     this.spells = {
       fireball: {
-        name: "Fireball",
         damage: 25,
         manaCost: 20,
-        cooldown: 1200,
+        cooldown: 1000,
         lastCast: 0
       },
 
       shield: {
-        name: "Shield",
         manaCost: 15,
         cooldown: 3000,
         lastCast: 0
@@ -32,14 +31,10 @@ export default class SpellSystem {
   /**
    * 🔁 Update
    */
-  update(deltaTime) {
-    if (this.projectiles?.update) {
-      this.projectiles.update(deltaTime);
-    }
-  }
+  update() {}
 
   /**
-   * 🪄 Cast Spell
+   * 🎯 Cast Spell
    */
   cast(spellName) {
     const spell = this.spells[spellName];
@@ -48,12 +43,12 @@ export default class SpellSystem {
 
     const now = Date.now();
 
-    // Cooldown
+    // Cooldown Check
     if (now - spell.lastCast < spell.cooldown) {
       return;
     }
 
-    // Mana
+    // Mana Check
     if (!this.player.useMana(spell.manaCost)) {
       console.log("❌ Not enough mana");
       return;
@@ -73,37 +68,36 @@ export default class SpellSystem {
   }
 
   /**
-   * 🔥 Fireball
+   * 🔥 Fireball Spell
    */
   castFireball(spell) {
-    // If Projectile System exists
-    if (this.projectiles?.spawnFireball) {
-      this.projectiles.spawnFireball(
-        this.player.x,
-        this.player.y,
-        this.enemy.x,
-        this.enemy.y,
-        spell.damage
-      );
-    } else {
-      // Temporary direct damage fallback
-      this.enemy.takeDamage(spell.damage);
+    if (!this.projectiles) {
+      console.warn("ProjectileSystem missing");
+      return;
     }
+
+    this.projectiles.spawnFireball(
+      this.player.x + this.player.size / 2,
+      this.player.y + this.player.size / 2,
+      this.enemy.x + this.enemy.size / 2,
+      this.enemy.y + this.enemy.size / 2,
+      spell.damage
+    );
 
     console.log("🔥 Fireball Cast");
   }
 
   /**
-   * 🛡 Shield
+   * 🛡 Shield Spell
    */
   castShield() {
     this.player.isShielded = true;
 
+    console.log("🛡 Shield Activated");
+
     setTimeout(() => {
       this.player.isShielded = false;
     }, 2000);
-
-    console.log("🛡 Shield Activated");
   }
 
   /**
@@ -111,22 +105,18 @@ export default class SpellSystem {
    */
   render(ctx) {
     ctx.fillStyle = "white";
-    ctx.font = "12px monospace";
+    ctx.font = "14px Arial";
 
     ctx.fillText(
       "SPACE = Fireball",
       20,
-      120
+      260
     );
 
     ctx.fillText(
       "SHIFT = Shield",
       20,
-      140
+      285
     );
-
-    if (this.projectiles?.render) {
-      this.projectiles.render(ctx);
-    }
   }
 }
