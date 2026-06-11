@@ -1,45 +1,64 @@
 /**
- * 🪄 Arcane Academy - Scene Manager
- * Handles switching between game scenes (Menu, Academy, Battle, etc.)
+ * 🎬 Arcane Academy - Scene Manager (PHASE 3 UPDATED)
+ * Handles scene registry, switching, and lifecycle safely
  */
 
 export default class SceneManager {
   constructor() {
-    this.currentScene = null;
     this.scenes = {};
+    this.currentScene = null;
+    this.currentSceneName = null;
   }
 
   /**
-   * 📦 Register a scene (optional for scaling)
+   * 📦 Register scene
    */
   addScene(name, scene) {
     this.scenes[name] = scene;
   }
 
   /**
-   * 🎬 Load a scene directly
+   * 🚀 Start system with initial scene
    */
-  loadScene(scene) {
-    // If there's an existing scene, clean it up
+  start(initialSceneName) {
+    this.switchScene(initialSceneName);
+  }
+
+  /**
+   * 🔁 Switch scenes safely
+   */
+  switchScene(name) {
+    const newScene = this.scenes[name];
+
+    if (!newScene) {
+      console.warn(`⚠️ Scene not found: ${name}`);
+      return;
+    }
+
+    // 🚪 unload old scene
     if (this.currentScene && this.currentScene.unload) {
       this.currentScene.unload();
     }
 
-    this.currentScene = scene;
+    // 🎬 set new scene
+    this.currentScene = newScene;
+    this.currentSceneName = name;
 
-    // Initialize new scene
-    if (this.currentScene && this.currentScene.init) {
+    // 🎬 init new scene
+    if (this.currentScene.init) {
       this.currentScene.init();
     }
 
-    console.log(`🎬 Scene loaded: ${scene.constructor.name}`);
+    console.log(`🎬 Switched to scene: ${name}`);
   }
 
   /**
    * 🔁 Update active scene
    */
   update(deltaTime) {
-    if (this.currentScene && this.currentScene.update) {
+    if (!this.currentScene) return;
+
+    if (this.currentScene.update) {
       this.currentScene.update(deltaTime);
     }
   }
@@ -48,22 +67,17 @@ export default class SceneManager {
    * 🎨 Render active scene
    */
   render(ctx) {
-    if (this.currentScene && this.currentScene.render) {
+    if (!this.currentScene) return;
+
+    if (this.currentScene.render) {
       this.currentScene.render(ctx);
     }
   }
 
   /**
-   * 🔄 Switch scene by name (if using registry)
+   * 📍 Get current scene name
    */
-  switchScene(name) {
-    const scene = this.scenes[name];
-
-    if (!scene) {
-      console.warn(`⚠️ Scene not found: ${name}`);
-      return;
-    }
-
-    this.loadScene(scene);
+  getCurrentScene() {
+    return this.currentSceneName;
   }
 }
