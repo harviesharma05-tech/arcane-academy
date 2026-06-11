@@ -1,20 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>🪄 Arcane Academy</title>
+  <title>Arcane Academy</title>
 
-    <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="./style.css">
 </head>
 <body>
 
-    <!-- 🎮 Main Game Canvas -->
-    <canvas id="gameCanvas"></canvas>
+  <!-- HUD -->
+  <div id="hud">
+    <h2>🪄 Arcane Academy</h2>
 
-    <!-- 🚀 Game Entry Point -->
-    <script type="module" src="./main.js"></script>
+    <p>HP: <span id="hp">100</span></p>
+    <p>Mana: <span id="mana">100</span></p>
+    <p>Level: <span id="level">1</span></p>
+
+    <hr>
+
+    <p>WASD = Move</p>
+    <p>SPACE = Fireball</p>
+    <p>SHIFT = Shield</p>
+  </div>
+
+  <!-- Game Canvas -->
+  <canvas id="gameCanvas"></canvas>
+
+  <!-- Main Entry -->
+  <script type="module" src="./main.js"></script>
 
 </body>
 </html>
