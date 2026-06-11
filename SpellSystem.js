@@ -1,21 +1,25 @@
 /**
- * 🪄 Arcane Academy - Spell System
- * Handles spell casting, mana usage, cooldowns, and effects
+ * 🪄 Arcane Academy - Spell System (PHASE 2 UPDATED)
+ * Now integrates projectile system + proper RPG flow
  */
 
 export default class SpellSystem {
-  constructor(player, enemy) {
+  constructor(player, enemy, projectileSystem, progressionSystem = null) {
     this.player = player;
     this.enemy = enemy;
 
-    // 🪄 Spell definitions
+    // 💥 external systems (Phase 2 upgrade)
+    this.projectiles = projectileSystem;
+    this.progression = progressionSystem;
+
+    // 🪄 Spell database
     this.spells = {
       fireball: {
         name: "Fireball",
         damage: 25,
         manaCost: 20,
-        cooldown: 1500,
-        range: 200,
+        cooldown: 1200,
+        range: 250,
         lastCast: 0,
       },
 
@@ -26,20 +30,17 @@ export default class SpellSystem {
         lastCast: 0,
       },
     };
-
-    // Active projectiles (future rendering support)
-    this.projectiles = [];
   }
 
   /**
-   * 🔁 Update system each frame
+   * 🔁 Update system
    */
   update() {
-    this.updateProjectiles();
+    // future: particle sync, buffs, etc.
   }
 
   /**
-   * 🔥 Cast a spell
+   * 🔥 Cast spell
    */
   cast(spellName) {
     const spell = this.spells[spellName];
@@ -49,103 +50,65 @@ export default class SpellSystem {
 
     // ⏱ cooldown check
     if (now - spell.lastCast < spell.cooldown) {
-      console.log(`⏳ ${spell.name} is on cooldown`);
+      console.log(`⏳ ${spell.name} cooling down`);
       return;
     }
 
     // 🔋 mana check
     if (!this.player.useMana(spell.manaCost)) {
-      console.log("❌ Not enough mana!");
+      console.log("❌ Not enough mana");
       return;
     }
 
     spell.lastCast = now;
 
-    // 🎯 Fireball logic
+    // 🎯 FIREBALL (projectile-based)
     if (spellName === "fireball") {
       this.castFireball(spell);
     }
 
-    // 🛡 Shield logic
+    // 🛡 SHIELD
     if (spellName === "shield") {
-      this.castShield(spell);
+      this.castShield();
     }
   }
 
   /**
-   * 🔥 Fireball spell
+   * 💥 FIREBALL (NOW REAL PROJECTILE)
    */
   castFireball(spell) {
-    const dx = this.enemy.x - this.player.x;
-    const dy = this.enemy.y - this.player.y;
+    this.projectiles.spawnFireball(
+      this.player.x,
+      this.player.y,
+      this.enemy.x,
+      this.enemy.y,
+      spell.damage
+    );
 
-    const distance = Math.sqrt(dx * dx + dy * dy);
-
-    if (distance <= spell.range) {
-      this.enemy.takeDamage(spell.damage);
-      console.log("🔥 Fireball hit enemy!");
-    } else {
-      console.log("🔥 Fireball missed!");
-    }
-
-    // projectile (future animation hook)
-    this.projectiles.push({
-      x: this.player.x,
-      y: this.player.y,
-      dx,
-      dy,
-      speed: 5,
-    });
+    console.log("🔥 Fireball casted!");
   }
 
   /**
    * 🛡 Shield spell
    */
-  castShield(spell) {
+  castShield() {
     this.player.isShielded = true;
 
     setTimeout(() => {
       this.player.isShielded = false;
     }, 2000);
 
-    console.log("🛡 Shield activated!");
+    console.log("🛡 Shield activated");
   }
 
   /**
-   * 💥 Update projectiles
-   */
-  updateProjectiles() {
-    for (let p of this.projectiles) {
-      const length = Math.sqrt(p.dx * p.dx + p.dy * p.dy);
-
-      p.x += (p.dx / length) * p.speed;
-      p.y += (p.dy / length) * p.speed;
-    }
-
-    // cleanup (simple version)
-    this.projectiles = this.projectiles.filter(
-      (p) =>
-        p.x > 0 &&
-        p.y > 0 &&
-        p.x < window.innerWidth &&
-        p.y < window.innerHeight
-    );
-  }
-
-  /**
-   * 🎨 Render debug info
+   * 🎨 Debug render
    */
   render(ctx) {
     ctx.fillStyle = "white";
     ctx.font = "12px monospace";
 
-    ctx.fillText("🪄 Spell System Active", 20, 120);
-    ctx.fillText("Spells: Fireball, Shield", 20, 140);
-
-    // Projectiles (simple visualization)
-    for (let p of this.projectiles) {
-      ctx.fillStyle = "orange";
-      ctx.fillRect(p.x, p.y, 5, 5);
-    }
+    ctx.fillText("🪄 SpellSystem Active", 20, 120);
+    ctx.fillText("Fireball | Shield", 20, 140);
   }
 }
