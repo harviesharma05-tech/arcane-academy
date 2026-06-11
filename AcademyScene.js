@@ -1,6 +1,6 @@
 /**
  * 🏰 Arcane Academy - Main Gameplay Scene
- * Stable Debug Version
+ * Stable Version
  */
 
 import Player from "../entities/Player.js";
@@ -20,38 +20,35 @@ export default class AcademyScene {
   }
 
   /**
-   * 🎬 Scene Init
+   * 🎬 Initialize Scene
    */
   init() {
     console.log("🏰 Academy Scene Initialized");
 
-    // Player
+    // 🧍 Player
     this.player = new Player(150, 150);
 
-    // Enemy
+    // 👾 Enemy
     this.enemy = new Enemy(500, 250);
 
-    // Systems
+    // ⚔️ Combat System
     this.combat = new CombatSystem(
       this.player,
       this.enemy
     );
 
+    // 🪄 Spell System
     this.spellSystem = new SpellSystem(
       this.player,
       this.enemy
     );
 
-    // Connect GameState
-    if (this.game.gameState) {
-      this.game.gameState.player = this.player;
-      this.game.gameState.enemy = this.enemy;
-    }
+    // 🧠 Connect GameState
+    this.game.gameState.player = this.player;
+    this.game.gameState.enemy = this.enemy;
 
-    // Connect HUD
-    if (this.game.hud) {
-      this.game.hud.player = this.player;
-    }
+    // 🖥️ Connect HUD
+    this.game.hud.player = this.player;
   }
 
   /**
@@ -62,7 +59,7 @@ export default class AcademyScene {
 
     const input = this.game.input;
 
-    // Player movement
+    // Movement
     this.player.update(input);
 
     // Fireball
@@ -83,7 +80,7 @@ export default class AcademyScene {
       this.combat.update(deltaTime);
     }
 
-    // Spells
+    // Spell System
     if (this.spellSystem?.update) {
       this.spellSystem.update(deltaTime);
     }
@@ -108,10 +105,10 @@ export default class AcademyScene {
     ctx.fillText(
       "🪄 Arcane Academy",
       20,
-      30
+      140
     );
 
-    // Debug square
+    // Debug Square
     ctx.fillStyle = "red";
     ctx.fillRect(100, 100, 50, 50);
 
