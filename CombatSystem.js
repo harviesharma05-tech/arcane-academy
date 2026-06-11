@@ -1,127 +1,51 @@
 /**
- * 👾 Arcane Academy - Enemy Entity
- * Basic AI: idle movement, player detection, chase & attack
+ * ⚔️ Arcane Academy - Combat System
  */
 
-export default class Enemy {
-  constructor(x, y) {
-    // Position
-    this.x = x;
-    this.y = y;
-
-    // Visual
-    this.size = 32;
-    this.color = "red";
-
-    // Stats
-    this.hp = 100;
-    this.maxHP = 100;
-    this.damage = 5;
-
-    // AI
-    this.speed = 1.5;
-    this.state = "idle"; // idle | chase | attack
-
-    // Behavior
-    this.detectionRange = 180;
-    this.attackRange = 40;
-
-    // Movement
-    this.velocityX = 0;
-    this.velocityY = 0;
+export default class CombatSystem {
+  constructor(player, enemy) {
+    this.player = player;
+    this.enemy = enemy;
   }
 
   /**
-   * 🔁 Update AI logic
+   * 🔁 Update combat logic
    */
-  update(player) {
-    const dx = player.x - this.x;
-    const dy = player.y - this.y;
-    const distance = Math.sqrt(dx * dx + dy * dy);
+  update(deltaTime) {
+    // Enemy defeated
+    if (this.enemy.hp <= 0) {
+      this.enemy.hp = this.enemy.maxHP;
 
-    // AI STATE DECISION
-    if (distance < this.attackRange) {
-      this.state = "attack";
-    } else if (distance < this.detectionRange) {
-      this.state = "chase";
-    } else {
-      this.state = "idle";
-    }
+      this.enemy.x =
+        300 + Math.random() * 400;
 
-    // STATE BEHAVIOR
-    if (this.state === "chase") {
-      this.chasePlayer(dx, dy, distance);
-    }
+      this.enemy.y =
+        100 + Math.random() * 300;
 
-    if (this.state === "attack") {
-      this.attackPlayer(player);
-    }
+      // XP Reward
+      this.player.xp += 25;
 
-    if (this.state === "idle") {
-      this.idleMovement();
+      console.log("⭐ Enemy defeated");
     }
   }
 
   /**
-   * 🧠 Chase player behavior
-   */
-  chasePlayer(dx, dy, distance) {
-    this.velocityX = (dx / distance) * this.speed;
-    this.velocityY = (dy / distance) * this.speed;
-
-    this.x += this.velocityX;
-    this.y += this.velocityY;
-  }
-
-  /**
-   * ⚔️ Attack player
-   */
-  attackPlayer(player) {
-    // simple damage tick (can be upgraded to cooldown system)
-    player.takeDamage(this.damage);
-  }
-
-  /**
-   * 😴 Idle movement (small random motion)
-   */
-  idleMovement() {
-    this.x += Math.sin(Date.now() / 500) * 0.3;
-    this.y += Math.cos(Date.now() / 500) * 0.3;
-  }
-
-  /**
-   * 💥 Take damage
-   */
-  takeDamage(amount) {
-    this.hp -= amount;
-
-    if (this.hp < 0) this.hp = 0;
-  }
-
-  /**
-   * 🎨 Render enemy
+   * 🎨 Debug Render
    */
   render(ctx) {
-    // Enemy body
-    ctx.fillStyle = this.color;
-    ctx.fillRect(this.x, this.y, this.size, this.size);
+    ctx.fillStyle = "white";
+    ctx.font = "14px monospace";
 
-    // HP bar background
-    ctx.fillStyle = "black";
-    ctx.fillRect(this.x, this.y - 10, this.size, 5);
-
-    // HP bar fill
-    ctx.fillStyle = "lime";
-    ctx.fillRect(
-      this.x,
-      this.y - 10,
-      this.size * (this.hp / this.maxHP),
-      5
+    ctx.fillText(
+      `Enemy HP: ${Math.floor(this.enemy.hp)}`,
+      20,
+      170
     );
 
-    // State indicator (debug useful for recruiters)
-    ctx.fillStyle = "white";
-    ctx.font = "10px monospace";
-    ctx.fillText(this.state, this.x, this.y - 15);
+    ctx.fillText(
+      `XP: ${this.player.xp}`,
+      20,
+      190
+    );
   }
 }
