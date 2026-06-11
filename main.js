@@ -1,4 +1,8 @@
-import Game from "./engine/Game.js";
+/**
+ * 🪄 Arcane Academy - Entry Point
+ */
+
+import Game from "./Game.js";
 
 console.log("✅ main.js loaded");
 
