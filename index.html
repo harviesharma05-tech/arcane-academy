@@ -1,77 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Arcane Academy - Magic RPG</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <link rel="stylesheet" href="style.css" />
+    <title>🪄 Arcane Academy</title>
 
-  <!-- Optional: Google Font for UI polish -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-
-  <style>
-    /* Small fallback UI overlay */
-    #ui-overlay {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      color: white;
-      font-family: 'Press Start 2P', monospace;
-      font-size: 10px;
-      z-index: 10;
-      user-select: none;
-    }
-
-    #hud {
-      margin-top: 10px;
-      padding: 8px;
-      background: rgba(0,0,0,0.4);
-      border: 1px solid #333;
-    }
-
-    #controls {
-      margin-top: 10px;
-      opacity: 0.8;
-    }
-
-    canvas {
-      position: absolute;
-      top: 0;
-      left: 0;
-    }
-  </style>
+    <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
-  <!-- 🎮 UI Overlay (HUD Layer) -->
-  <div id="ui-overlay">
+    <!-- 🎮 Main Game Canvas -->
+    <canvas id="gameCanvas"></canvas>
 
-    <div id="title">
-      🪄 Arcane Academy
-    </div>
-
-    <div id="hud">
-      <div>HP: <span id="hp">100</span></div>
-      <div>Mana: <span id="mana">100</span></div>
-      <div>Level: <span id="level">1</span></div>
-    </div>
-
-    <div id="controls">
-      <p>WASD → Move</p>
-      <p>SPACE → Cast Spell (future upgrade)</p>
-    </div>
-
-  </div>
-
-  <!-- 🎮 Game Canvas -->
-  <canvas id="gameCanvas"></canvas>
-
-  <!-- 🚀 Game Entry Point -->
-  <script type="module" src="main.js"></script>
+    <!-- 🚀 Game Entry Point -->
+    <script type="module" src="./main.js"></script>
 
 </body>
 </html>
