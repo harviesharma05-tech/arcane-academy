@@ -1,6 +1,6 @@
 /**
- * 🪄 Arcane Academy - Core Game Engine (UPDATED)
- * Phase 1 Integrated: GameState + HUD + Scene + Input coordination
+ * 🪄 Arcane Academy - Core Game Engine
+ * Stable Version
  */
 
 import Input from "./Input.js";
@@ -15,35 +15,42 @@ export default class Game {
     this.canvas = canvas;
     this.ctx = canvas.getContext("2d");
 
-    // 🎮 Systems
+    // 🎮 Core Systems
     this.input = new Input();
     this.sceneManager = new SceneManager();
 
-    // 🧠 Global State (Phase 1)
+    // 🧠 Global State
     this.gameState = new GameState(null, null);
 
-    // 🖥️ HUD (UI Layer)
+    // 🖥️ HUD
     this.hud = new HUD(null);
 
-    // 🔁 Time tracking
+    // ⏱️ Timing
     this.lastTime = 0;
 
-    // 🎬 Load initial scene
-    const scene = new AcademyScene(this);
-    this.sceneManager.loadScene(scene);
+    // 🎬 Register Scene
+    const academyScene = new AcademyScene(this);
+
+    this.sceneManager.addScene(
+      "academy",
+      academyScene
+    );
+
+    // 🚀 Start Scene System
+    this.sceneManager.start("academy");
 
     console.log("🪄 Arcane Academy Engine Started");
   }
 
   /**
-   * 🚀 Start game loop
+   * 🚀 Start Game Loop
    */
   start() {
-    requestAnimationFrame(this.loop.bind(this));
+    requestAnimationFrame(this.loop);
   }
 
   /**
-   * 🔁 Main Game Loop
+   * 🔁 Main Loop
    */
   loop = (timestamp) => {
     const deltaTime = timestamp - this.lastTime;
@@ -56,45 +63,55 @@ export default class Game {
   };
 
   /**
-   * 🧠 Update engine + systems
+   * 🧠 Update Systems
    */
   update(deltaTime) {
-    // ⏸ Pause / Gameover handling
-    if (this.gameState.state === "gameover") {
-      console.log("💀 GAME OVER - Reload to restart");
-      return;
-    }
-
+    // Pause
     if (this.gameState.state === "paused") {
       return;
     }
 
-    // 🎮 Update scene
-    if (this.sceneManager.currentScene) {
-      this.sceneManager.update(deltaTime);
+    // Game Over
+    if (this.gameState.state === "gameover") {
+      return;
     }
 
-    // 🧠 Update global state
+    // 🎬 Active Scene
+    this.sceneManager.update(deltaTime);
+
+    // 🧠 State
     this.gameState.update();
 
-    // 🖥️ Update HUD
-    this.hud.update();
+    // 🖥️ HUD
+    if (this.hud.update) {
+      this.hud.update();
+    }
 
-    // ⌨️ Reset single-frame inputs
-    this.input.update();
+    // ⌨️ Input Cleanup
+    if (this.input.update) {
+      this.input.update();
+    }
   }
 
   /**
-   * 🎨 Render everything
+   * 🎨 Render
    */
   render() {
-    // Clear screen
+    // Clear Screen
     this.ctx.fillStyle = "#05070d";
-    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    this.ctx.fillRect(
+      0,
+      0,
+      this.canvas.width,
+      this.canvas.height
+    );
 
-    // 🎬 Render scene
-    if (this.sceneManager.currentScene) {
-      this.sceneManager.render(this.ctx);
+    // Scene
+    this.sceneManager.render(this.ctx);
+
+    // HUD
+    if (this.hud.render) {
+      this.hud.render(this.ctx);
     }
   }
 }
