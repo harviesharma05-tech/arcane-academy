@@ -1,6 +1,6 @@
 /**
- * 🏰 Arcane Academy - Main Gameplay Scene
- * Stable Version
+ * 🏰 Arcane Academy - Academy Scene
+ * Debug Safe Version
  */
 
 import Player from "../entities/Player.js";
@@ -25,30 +25,33 @@ export default class AcademyScene {
   init() {
     console.log("🏰 Academy Scene Initialized");
 
-    // 🧍 Player
+    // Player
     this.player = new Player(150, 150);
 
-    // 👾 Enemy
+    // Enemy
     this.enemy = new Enemy(500, 250);
 
-    // ⚔️ Combat System
+    // Systems
     this.combat = new CombatSystem(
       this.player,
       this.enemy
     );
 
-    // 🪄 Spell System
     this.spellSystem = new SpellSystem(
       this.player,
       this.enemy
     );
 
-    // 🧠 Connect GameState
-    this.game.gameState.player = this.player;
-    this.game.gameState.enemy = this.enemy;
+    // Connect GameState
+    if (this.game.gameState) {
+      this.game.gameState.player = this.player;
+      this.game.gameState.enemy = this.enemy;
+    }
 
-    // 🖥️ Connect HUD
-    this.game.hud.player = this.player;
+    // Connect HUD
+    if (this.game.hud) {
+      this.game.hud.player = this.player;
+    }
   }
 
   /**
@@ -80,7 +83,7 @@ export default class AcademyScene {
       this.combat.update(deltaTime);
     }
 
-    // Spell System
+    // Spells
     if (this.spellSystem?.update) {
       this.spellSystem.update(deltaTime);
     }
@@ -99,37 +102,50 @@ export default class AcademyScene {
       this.game.canvas.height
     );
 
-    // Title
-    ctx.fillStyle = "#7dd3fc";
-    ctx.font = "18px monospace";
+    // Debug Title
+    ctx.fillStyle = "white";
+    ctx.font = "24px Arial";
     ctx.fillText(
-      "🪄 Arcane Academy",
+      "🪄 Arcane Academy Running",
       20,
-      140
+      50
     );
 
-    // Debug Square
-    ctx.fillStyle = "red";
-    ctx.fillRect(100, 100, 50, 50);
+    // Yellow Debug Square
+    ctx.fillStyle = "yellow";
+    ctx.fillRect(
+      200,
+      200,
+      100,
+      100
+    );
 
-    // Player
-    if (this.player?.render) {
-      this.player.render(ctx);
+    // Render Player
+    try {
+      this.player?.render(ctx);
+    } catch (err) {
+      console.error("Player Render Error:", err);
     }
 
-    // Enemy
-    if (this.enemy?.render) {
-      this.enemy.render(ctx);
+    // Render Enemy
+    try {
+      this.enemy?.render(ctx);
+    } catch (err) {
+      console.error("Enemy Render Error:", err);
     }
 
-    // Combat UI
-    if (this.combat?.render) {
-      this.combat.render(ctx);
+    // Render Combat
+    try {
+      this.combat?.render?.(ctx);
+    } catch (err) {
+      console.error("Combat Render Error:", err);
     }
 
-    // Spell UI
-    if (this.spellSystem?.render) {
-      this.spellSystem.render(ctx);
+    // Render Spell System
+    try {
+      this.spellSystem?.render?.(ctx);
+    } catch (err) {
+      console.error("Spell Render Error:", err);
     }
   }
 
