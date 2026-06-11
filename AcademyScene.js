@@ -1,11 +1,12 @@
 /**
- * 🏰 Arcane Academy - Main Gameplay Scene
+ * 🏰 Arcane Academy - Main Gameplay Scene (PHASE 4)
  */
 
 import Player from "./Player.js";
 import Enemy from "./Enemy.js";
 import CombatSystem from "./CombatSystem.js";
 import SpellSystem from "./SpellSystem.js";
+import ProjectileSystem from "./ProjectileSystem.js";
 
 export default class AcademyScene {
   constructor(game) {
@@ -16,6 +17,7 @@ export default class AcademyScene {
 
     this.combat = null;
     this.spellSystem = null;
+    this.projectiles = null;
   }
 
   /**
@@ -24,29 +26,37 @@ export default class AcademyScene {
   init() {
     console.log("🏰 Academy Scene Initialized");
 
-    // Player Spawn
+    // 🧍 Player
     this.player = new Player(250, 300);
 
-    // Enemy Spawn
+    // 👾 Enemy
     this.enemy = new Enemy(700, 300);
 
-    // Systems
+    // 💥 Projectile System
+    this.projectiles = new ProjectileSystem(
+      this.enemy,
+      this.player
+    );
+
+    // ⚔️ Combat
     this.combat = new CombatSystem(
       this.player,
       this.enemy
     );
 
+    // 🪄 Spells
     this.spellSystem = new SpellSystem(
       this.player,
-      this.enemy
+      this.enemy,
+      this.projectiles
     );
 
-    // HUD Connection
+    // HUD
     if (this.game.hud) {
       this.game.hud.player = this.player;
     }
 
-    // Game State Connection
+    // Game State
     if (this.game.gameState) {
       this.game.gameState.player = this.player;
       this.game.gameState.enemy = this.enemy;
@@ -56,50 +66,39 @@ export default class AcademyScene {
   }
 
   /**
-   * 🔁 Update
+   * 🔁 Update Loop
    */
   update(deltaTime) {
     const input = this.game.input;
 
     // Player
-    if (this.player) {
-      this.player.update(input);
-    }
+    this.player.update(input);
 
     // Fireball
-    if (
-      this.spellSystem &&
-      input.isPressed(" ")
-    ) {
+    if (input.isPressed(" ")) {
       this.spellSystem.cast("fireball");
     }
 
     // Shield
     if (
-      this.spellSystem &&
-      input.isPressed("shift")
+      input.isPressed("shift") ||
+      input.isPressed("shiftleft") ||
+      input.isPressed("shiftright")
     ) {
       this.spellSystem.cast("shield");
     }
 
-    // Enemy
-    if (this.enemy) {
-      this.enemy.update(this.player);
-    }
+    // Enemy AI
+    this.enemy.update(this.player);
 
-    // Combat
-    if (this.combat?.update) {
-      this.combat.update(deltaTime);
-    }
-
-    // Spell System
-    if (this.spellSystem?.update) {
-      this.spellSystem.update(deltaTime);
-    }
+    // Systems
+    this.projectiles.update();
+    this.combat.update(deltaTime);
+    this.spellSystem.update(deltaTime);
   }
 
   /**
-   * 🎨 Render
+   * 🎨 Render Scene
    */
   render(ctx) {
     // Background
@@ -142,25 +141,16 @@ export default class AcademyScene {
       140
     );
 
-    // Player
-    if (this.player?.render) {
-      this.player.render(ctx);
-    }
+    // Entities
+    this.player.render(ctx);
+    this.enemy.render(ctx);
 
-    // Enemy
-    if (this.enemy?.render) {
-      this.enemy.render(ctx);
-    }
+    // Projectiles
+    this.projectiles.render(ctx);
 
-    // Combat UI
-    if (this.combat?.render) {
-      this.combat.render(ctx);
-    }
-
-    // Spell UI
-    if (this.spellSystem?.render) {
-      this.spellSystem.render(ctx);
-    }
+    // Systems UI
+    this.combat.render(ctx);
+    this.spellSystem.render(ctx);
   }
 
   /**
