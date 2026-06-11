@@ -13,7 +13,6 @@ export default class AcademyScene {
 
     this.player = null;
     this.enemy = null;
-
     this.combat = null;
     this.spellSystem = null;
   }
@@ -22,34 +21,45 @@ export default class AcademyScene {
    * 🎬 Initialize Scene
    */
   init() {
-    console.log("🏰 Academy Scene Initialized");
+    try {
+      console.log("STEP 1");
 
-    // Player
-    this.player = new Player(150, 150);
+      this.player = new Player(150, 150);
 
-    // Enemy
-    this.enemy = new Enemy(500, 250);
+      console.log("STEP 2");
 
-    // Systems
-    this.combat = new CombatSystem(
-      this.player,
-      this.enemy
-    );
+      this.enemy = new Enemy(500, 250);
 
-    this.spellSystem = new SpellSystem(
-      this.player,
-      this.enemy
-    );
+      console.log("STEP 3");
 
-    // Connect GameState
-    if (this.game.gameState) {
-      this.game.gameState.player = this.player;
-      this.game.gameState.enemy = this.enemy;
-    }
+      this.combat = new CombatSystem(
+        this.player,
+        this.enemy
+      );
 
-    // Connect HUD
-    if (this.game.hud) {
-      this.game.hud.player = this.player;
+      console.log("STEP 4");
+
+      this.spellSystem = new SpellSystem(
+        this.player,
+        this.enemy
+      );
+
+      console.log("STEP 5");
+
+      // Connect HUD
+      if (this.game.hud) {
+        this.game.hud.player = this.player;
+      }
+
+      // Connect Game State
+      if (this.game.gameState) {
+        this.game.gameState.player = this.player;
+        this.game.gameState.enemy = this.enemy;
+      }
+
+      console.log("✅ AcademyScene initialized");
+    } catch (err) {
+      console.error("❌ AcademyScene Init Error:", err);
     }
   }
 
@@ -57,30 +67,32 @@ export default class AcademyScene {
    * 🔁 Update
    */
   update(deltaTime) {
+    if (!this.player || !this.enemy) return;
+
     const input = this.game.input;
 
-    // Player movement
     this.player.update(input);
 
-    // Fireball
-    if (input.isPressed(" ")) {
+    if (
+      this.spellSystem &&
+      input.isPressed(" ")
+    ) {
       this.spellSystem.cast("fireball");
     }
 
-    // Shield
-    if (input.isPressed("shift")) {
+    if (
+      this.spellSystem &&
+      input.isPressed("shift")
+    ) {
       this.spellSystem.cast("shield");
     }
 
-    // Enemy AI
     this.enemy.update(this.player);
 
-    // Combat
     if (this.combat?.update) {
       this.combat.update(deltaTime);
     }
 
-    // Spell system
     if (this.spellSystem?.update) {
       this.spellSystem.update(deltaTime);
     }
@@ -108,24 +120,32 @@ export default class AcademyScene {
       50
     );
 
-    // Player
-    if (this.player?.render) {
-      this.player.render(ctx);
+    // Debug square
+    ctx.fillStyle = "yellow";
+    ctx.fillRect(300, 150, 60, 60);
+
+    try {
+      this.player?.render(ctx);
+    } catch (err) {
+      console.error("Player Render Error:", err);
     }
 
-    // Enemy
-    if (this.enemy?.render) {
-      this.enemy.render(ctx);
+    try {
+      this.enemy?.render(ctx);
+    } catch (err) {
+      console.error("Enemy Render Error:", err);
     }
 
-    // Combat UI
-    if (this.combat?.render) {
-      this.combat.render(ctx);
+    try {
+      this.combat?.render?.(ctx);
+    } catch (err) {
+      console.error("Combat Render Error:", err);
     }
 
-    // Spell UI
-    if (this.spellSystem?.render) {
-      this.spellSystem.render(ctx);
+    try {
+      this.spellSystem?.render?.(ctx);
+    } catch (err) {
+      console.error("Spell Render Error:", err);
     }
   }
 
