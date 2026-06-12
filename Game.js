@@ -13,7 +13,7 @@ export default class Game {
     this.canvas = canvas;
     this.ctx = canvas.getContext("2d");
 
-    // Systems
+    // Core systems
     this.input = new Input();
     this.sceneManager = new SceneManager();
     this.gameState = new GameState();
@@ -24,17 +24,18 @@ export default class Game {
     // Create scene
     const academyScene = new AcademyScene(this);
 
-    // Register scene
-    this.sceneManager.addScene("academy", academyScene);
+    this.sceneManager.addScene(
+      "academy",
+      academyScene
+    );
 
-    // Start scene
     this.sceneManager.start("academy");
 
     console.log("🪄 Arcane Academy Engine Started");
   }
 
   /**
-   * 🚀 Start Game
+   * 🚀 Start game
    */
   start() {
     requestAnimationFrame(this.loop);
@@ -57,25 +58,20 @@ export default class Game {
    * 🧠 Update
    */
   update(deltaTime) {
-    // Pause/Game Over
     if (this.gameState.state === "paused") return;
     if (this.gameState.state === "gameover") return;
 
-    // Update current scene
     this.sceneManager.update(deltaTime);
 
-    // Update game state
     if (this.gameState.update) {
       this.gameState.update();
     }
 
-    // Update HUD
     if (this.hud.update) {
       this.hud.update();
     }
 
-    // VERY IMPORTANT:
-    // Clear one-frame key presses AFTER scene update
+    // VERY IMPORTANT
     this.input.update();
   }
 
@@ -83,7 +79,6 @@ export default class Game {
    * 🎨 Render
    */
   render() {
-    // Clear screen
     this.ctx.clearRect(
       0,
       0,
@@ -91,7 +86,6 @@ export default class Game {
       this.canvas.height
     );
 
-    // Background
     this.ctx.fillStyle = "#0b0f1a";
     this.ctx.fillRect(
       0,
@@ -100,12 +94,8 @@ export default class Game {
       this.canvas.height
     );
 
-    // Render current scene
     this.sceneManager.render(this.ctx);
 
-    // Render HUD
-    if (this.hud.render) {
-      this.hud.render(this.ctx);
-    }
+    this.hud.render(this.ctx);
   }
 }
