@@ -1,64 +1,76 @@
 /**
- * 🎬 Arcane Academy - Scene Manager (PHASE 3 UPDATED)
- * Handles scene registry, switching, and lifecycle safely
+ * 🎬 Arcane Academy - Scene Manager
+ * Handles scene registration and switching
  */
 
 export default class SceneManager {
   constructor() {
+    // All scenes
     this.scenes = {};
+
+    // Active scene
     this.currentScene = null;
     this.currentSceneName = null;
   }
 
   /**
-   * 📦 Register scene
+   * 📦 Add Scene
    */
   addScene(name, scene) {
     this.scenes[name] = scene;
   }
 
   /**
-   * 🚀 Start system with initial scene
+   * 🚀 Start Game
    */
   start(initialSceneName) {
     this.switchScene(initialSceneName);
   }
 
   /**
-   * 🔁 Switch scenes safely
+   * 🔁 Switch Scene
    */
   switchScene(name) {
-    const newScene = this.scenes[name];
-
-    if (!newScene) {
-      console.warn(`⚠️ Scene not found: ${name}`);
-      return;
-    }
-
-    // 🚪 unload old scene
-    if (this.currentScene && this.currentScene.unload) {
+    // Leave previous scene
+    if (
+      this.currentScene &&
+      typeof this.currentScene.unload === "function"
+    ) {
       this.currentScene.unload();
     }
 
-    // 🎬 set new scene
-    this.currentScene = newScene;
-    this.currentSceneName = name;
+    // Find new scene
+    const scene = this.scenes[name];
 
-    // 🎬 init new scene
-    if (this.currentScene.init) {
-      this.currentScene.init();
+    if (!scene) {
+      console.error(
+        `❌ Scene "${name}" not found`
+      );
+      return;
     }
 
-    console.log(`🎬 Switched to scene: ${name}`);
+    // Set active scene
+    this.currentScene = scene;
+    this.currentSceneName = name;
+
+    // Initialize scene
+    if (typeof scene.init === "function") {
+      scene.init();
+    }
+
+    console.log(
+      `🎬 Switched to scene: ${name}`
+    );
   }
 
   /**
    * 🔁 Update active scene
    */
   update(deltaTime) {
-    if (!this.currentScene) return;
-
-    if (this.currentScene.update) {
+    if (
+      this.currentScene &&
+      typeof this.currentScene.update === "function"
+    ) {
       this.currentScene.update(deltaTime);
     }
   }
@@ -67,15 +79,16 @@ export default class SceneManager {
    * 🎨 Render active scene
    */
   render(ctx) {
-    if (!this.currentScene) return;
-
-    if (this.currentScene.render) {
+    if (
+      this.currentScene &&
+      typeof this.currentScene.render === "function"
+    ) {
       this.currentScene.render(ctx);
     }
   }
 
   /**
-   * 📍 Get current scene name
+   * 📍 Current Scene Name
    */
   getCurrentScene() {
     return this.currentSceneName;
