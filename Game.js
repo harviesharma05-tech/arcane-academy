@@ -6,7 +6,7 @@ import Input from "./Input.js";
 import SceneManager from "./SceneManager.js";
 import GameState from "./GameState.js";
 import HUD from "./HUD.js";
-import AcademyScene from "../scenes/AcademyScene.js";
+import AcademyScene from "./AcademyScene.js";
 
 export default class Game {
   constructor(canvas) {
@@ -21,19 +21,28 @@ export default class Game {
 
     this.lastTime = 0;
 
-    // Scene
+    // Create scene
     const academyScene = new AcademyScene(this);
 
+    // Register scene
     this.sceneManager.addScene("academy", academyScene);
+
+    // Start scene
     this.sceneManager.start("academy");
 
     console.log("🪄 Arcane Academy Engine Started");
   }
 
+  /**
+   * 🚀 Start Game
+   */
   start() {
     requestAnimationFrame(this.loop);
   }
 
+  /**
+   * 🔁 Main Loop
+   */
   loop = (timestamp) => {
     const deltaTime = timestamp - this.lastTime;
     this.lastTime = timestamp;
@@ -44,24 +53,44 @@ export default class Game {
     requestAnimationFrame(this.loop);
   };
 
+  /**
+   * 🧠 Update
+   */
   update(deltaTime) {
+    // Pause/Game Over
     if (this.gameState.state === "paused") return;
     if (this.gameState.state === "gameover") return;
 
-    // Scene update
+    // Update current scene
     this.sceneManager.update(deltaTime);
 
-    // Global state
-    this.gameState.update();
+    // Update game state
+    if (this.gameState.update) {
+      this.gameState.update();
+    }
 
-    // HUD
-    this.hud.update();
+    // Update HUD
+    if (this.hud.update) {
+      this.hud.update();
+    }
 
-    // IMPORTANT: reset pressed keys LAST
+    // VERY IMPORTANT:
+    // Clear one-frame key presses AFTER scene update
     this.input.update();
   }
 
+  /**
+   * 🎨 Render
+   */
   render() {
+    // Clear screen
+    this.ctx.clearRect(
+      0,
+      0,
+      this.canvas.width,
+      this.canvas.height
+    );
+
     // Background
     this.ctx.fillStyle = "#0b0f1a";
     this.ctx.fillRect(
@@ -71,10 +100,12 @@ export default class Game {
       this.canvas.height
     );
 
-    // Scene
+    // Render current scene
     this.sceneManager.render(this.ctx);
 
-    // HUD
-    this.hud.render(this.ctx);
+    // Render HUD
+    if (this.hud.render) {
+      this.hud.render(this.ctx);
+    }
   }
 }
