@@ -2,12 +2,12 @@
  * 🏰 Arcane Academy - Main Gameplay Scene (PHASE 4)
  */
 
-import Player from "../entities/Player.js";
-import Enemy from "../entities/Enemy.js";
+import Player from "./Player.js";
+import Enemy from "./Enemy.js";
 
-import CombatSystem from "../systems/CombatSystem.js";
-import SpellSystem from "../systems/SpellSystem.js";
-import ProjectileSystem from "../systems/ProjectileSystem.js";
+import CombatSystem from "./CombatSystem.js";
+import SpellSystem from "./SpellSystem.js";
+import ProjectileSystem from "./ProjectileSystem.js";
 
 export default class AcademyScene {
   constructor(game) {
@@ -43,12 +43,8 @@ export default class AcademyScene {
       this.projectiles
     );
 
-    // HUD
+    // Connect HUD
     this.game.hud.player = this.player;
-
-    // Game State
-    this.game.gameState.player = this.player;
-    this.game.gameState.enemy = this.enemy;
 
     console.log("✅ Academy Scene Ready");
   }
@@ -59,7 +55,7 @@ export default class AcademyScene {
   update(deltaTime) {
     const input = this.game.input;
 
-    // Player movement
+    // Player
     this.player.update(input);
 
     // Fireball
@@ -78,7 +74,10 @@ export default class AcademyScene {
     // Systems
     this.projectiles.update();
     this.combat.update(deltaTime);
-    this.spellSystem.update(deltaTime);
+
+    if (this.spellSystem.update) {
+      this.spellSystem.update(deltaTime);
+    }
   }
 
   /**
@@ -97,44 +96,30 @@ export default class AcademyScene {
     // Title
     ctx.fillStyle = "#7dd3fc";
     ctx.font = "28px Arial";
-    ctx.fillText(
-      "🪄 Arcane Academy",
-      20,
-      40
-    );
+    ctx.fillText("🪄 Arcane Academy", 20, 40);
 
     // Controls
     ctx.fillStyle = "white";
     ctx.font = "16px Arial";
 
-    ctx.fillText(
-      "WASD = Move",
-      20,
-      80
-    );
+    ctx.fillText("WASD = Move", 20, 80);
+    ctx.fillText("SPACE = Fireball", 20, 105);
+    ctx.fillText("SHIFT = Shield", 20, 130);
 
-    ctx.fillText(
-      "SPACE = Fireball",
-      20,
-      105
-    );
-
-    ctx.fillText(
-      "SHIFT = Shield",
-      20,
-      130
-    );
-
-    // Render entities
+    // Entities
     this.player.render(ctx);
     this.enemy.render(ctx);
 
-    // Render projectiles
+    // Projectiles
     this.projectiles.render(ctx);
 
-    // Render systems
+    // Combat info
     this.combat.render(ctx);
-    this.spellSystem.render(ctx);
+
+    // Spell effects
+    if (this.spellSystem.render) {
+      this.spellSystem.render(ctx);
+    }
   }
 
   /**
