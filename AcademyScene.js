@@ -2,22 +2,16 @@
  * 🏰 Arcane Academy - Main Gameplay Scene (PHASE 4)
  */
 
-import Player from "./Player.js";
-import Enemy from "./Enemy.js";
-import CombatSystem from "./CombatSystem.js";
-import SpellSystem from "./SpellSystem.js";
-import ProjectileSystem from "./ProjectileSystem.js";
+import Player from "../entities/Player.js";
+import Enemy from "../entities/Enemy.js";
+
+import CombatSystem from "../systems/CombatSystem.js";
+import SpellSystem from "../systems/SpellSystem.js";
+import ProjectileSystem from "../systems/ProjectileSystem.js";
 
 export default class AcademyScene {
   constructor(game) {
     this.game = game;
-
-    this.player = null;
-    this.enemy = null;
-
-    this.combat = null;
-    this.spellSystem = null;
-    this.projectiles = null;
   }
 
   /**
@@ -26,25 +20,23 @@ export default class AcademyScene {
   init() {
     console.log("🏰 Academy Scene Initialized");
 
-    // 🧍 Player
-    this.player = new Player(250, 300);
+    // Player
+    this.player = new Player(150, 150);
 
-    // 👾 Enemy
-    this.enemy = new Enemy(700, 300);
+    // Enemy
+    this.enemy = new Enemy(500, 250);
 
-    // 💥 Projectile System
+    // Systems
     this.projectiles = new ProjectileSystem(
       this.enemy,
       this.player
     );
 
-    // ⚔️ Combat
     this.combat = new CombatSystem(
       this.player,
       this.enemy
     );
 
-    // 🪄 Spells
     this.spellSystem = new SpellSystem(
       this.player,
       this.enemy,
@@ -52,26 +44,22 @@ export default class AcademyScene {
     );
 
     // HUD
-    if (this.game.hud) {
-      this.game.hud.player = this.player;
-    }
+    this.game.hud.player = this.player;
 
     // Game State
-    if (this.game.gameState) {
-      this.game.gameState.player = this.player;
-      this.game.gameState.enemy = this.enemy;
-    }
+    this.game.gameState.player = this.player;
+    this.game.gameState.enemy = this.enemy;
 
-    console.log("✅ Scene Ready");
+    console.log("✅ Academy Scene Ready");
   }
 
   /**
-   * 🔁 Update Loop
+   * 🔁 Update
    */
   update(deltaTime) {
     const input = this.game.input;
 
-    // Player
+    // Player movement
     this.player.update(input);
 
     // Fireball
@@ -80,11 +68,7 @@ export default class AcademyScene {
     }
 
     // Shield
-    if (
-      input.isPressed("shift") ||
-      input.isPressed("shiftleft") ||
-      input.isPressed("shiftright")
-    ) {
+    if (input.isPressed("shift")) {
       this.spellSystem.cast("shield");
     }
 
@@ -98,7 +82,7 @@ export default class AcademyScene {
   }
 
   /**
-   * 🎨 Render Scene
+   * 🎨 Render
    */
   render(ctx) {
     // Background
@@ -116,7 +100,7 @@ export default class AcademyScene {
     ctx.fillText(
       "🪄 Arcane Academy",
       20,
-      50
+      40
     );
 
     // Controls
@@ -126,29 +110,29 @@ export default class AcademyScene {
     ctx.fillText(
       "WASD = Move",
       20,
-      90
+      80
     );
 
     ctx.fillText(
       "SPACE = Fireball",
       20,
-      115
+      105
     );
 
     ctx.fillText(
       "SHIFT = Shield",
       20,
-      140
+      130
     );
 
-    // Entities
+    // Render entities
     this.player.render(ctx);
     this.enemy.render(ctx);
 
-    // Projectiles
+    // Render projectiles
     this.projectiles.render(ctx);
 
-    // Systems UI
+    // Render systems
     this.combat.render(ctx);
     this.spellSystem.render(ctx);
   }
