@@ -63,7 +63,7 @@ export default class AcademyScene {
     this.player.update(input);
 
     // Fireball
-    if (input.isPressed(" ")) {
+    if (input.isPressed("space")) {
       this.spellSystem.cast("fireball");
     }
 
