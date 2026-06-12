@@ -1,36 +1,69 @@
 /**
- * 💥 Arcane Academy - Visual Feedback System
+ * ✨ Arcane Academy - VFX System
  */
 
 export default class VFXSystem {
   constructor() {
-    this.texts = [];
+    this.effects = [];
   }
 
-  addText(x, y, text, color = "white") {
-    this.texts.push({
+  /**
+   * 💥 Spawn Effect
+   */
+  spawn(x, y, color = "orange") {
+
+    this.effects.push({
       x,
       y,
-      text,
-      color,
-      life: 60,
+      radius: 20,
+      alpha: 1,
+      color
     });
+
   }
 
+  /**
+   * 🔁 Update
+   */
   update() {
-    this.texts.forEach(t => {
-      t.y -= 0.5;
-      t.life--;
+
+    this.effects.forEach(effect => {
+
+      effect.radius += 1.5;
+      effect.alpha -= 0.03;
+
     });
 
-    this.texts = this.texts.filter(t => t.life > 0);
+    this.effects = this.effects.filter(
+      effect => effect.alpha > 0
+    );
   }
 
+  /**
+   * 🎨 Render
+   */
   render(ctx) {
-    this.texts.forEach(t => {
-      ctx.fillStyle = t.color;
-      ctx.font = "12px monospace";
-      ctx.fillText(t.text, t.x, t.y);
+
+    this.effects.forEach(effect => {
+
+      ctx.beginPath();
+
+      ctx.arc(
+        effect.x,
+        effect.y,
+        effect.radius,
+        0,
+        Math.PI * 2
+      );
+
+      ctx.strokeStyle =
+        `rgba(255,165,0,${effect.alpha})`;
+
+      ctx.lineWidth = 3;
+
+      ctx.stroke();
+
     });
+
   }
 }
