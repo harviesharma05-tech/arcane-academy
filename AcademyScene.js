@@ -1,5 +1,5 @@
 /**
- * 🏰 Arcane Academy - Main Gameplay Scene (PHASE 4)
+ * 🏰 Arcane Academy - Main Gameplay Scene
  */
 
 import Player from "./Player.js";
@@ -15,7 +15,7 @@ export default class AcademyScene {
   }
 
   /**
-   * 🎬 Initialize Scene
+   * 🎬 Initialize
    */
   init() {
     console.log("🏰 Academy Scene Initialized");
@@ -43,7 +43,7 @@ export default class AcademyScene {
       this.projectiles
     );
 
-    // Connect HUD
+    // HUD
     this.game.hud.player = this.player;
 
     console.log("✅ Academy Scene Ready");
@@ -55,7 +55,7 @@ export default class AcademyScene {
   update(deltaTime) {
     const input = this.game.input;
 
-    // Player
+    // Player movement
     this.player.update(input);
 
     // Fireball
@@ -73,10 +73,10 @@ export default class AcademyScene {
 
     // Systems
     this.projectiles.update();
-    this.combat.update(deltaTime);
+    this.combat.update();
 
     if (this.spellSystem.update) {
-      this.spellSystem.update(deltaTime);
+      this.spellSystem.update();
     }
   }
 
@@ -84,42 +84,49 @@ export default class AcademyScene {
    * 🎨 Render
    */
   render(ctx) {
-    // Background
-    ctx.fillStyle = "#0b0f1a";
-    ctx.fillRect(
-      0,
-      0,
-      this.game.canvas.width,
-      this.game.canvas.height
-    );
-
     // Title
     ctx.fillStyle = "#7dd3fc";
     ctx.font = "28px Arial";
-    ctx.fillText("🪄 Arcane Academy", 20, 40);
+    ctx.fillText(
+      "🪄 Arcane Academy",
+      20,
+      40
+    );
 
     // Controls
     ctx.fillStyle = "white";
     ctx.font = "16px Arial";
 
-    ctx.fillText("WASD = Move", 20, 80);
-    ctx.fillText("SPACE = Fireball", 20, 105);
-    ctx.fillText("SHIFT = Shield", 20, 130);
+    ctx.fillText(
+      "WASD = Move",
+      20,
+      80
+    );
 
-    // Entities
+    ctx.fillText(
+      "SPACE = Fireball",
+      20,
+      105
+    );
+
+    ctx.fillText(
+      "SHIFT = Shield",
+      20,
+      130
+    );
+
+    // Draw entities
     this.player.render(ctx);
     this.enemy.render(ctx);
 
-    // Projectiles
+    // Draw projectiles
     this.projectiles.render(ctx);
 
-    // Combat info
+    // Draw combat info
     this.combat.render(ctx);
 
-    // Spell effects
-    if (this.spellSystem.render) {
-      this.spellSystem.render(ctx);
-    }
+    // Draw spell info
+    this.spellSystem.render(ctx);
   }
 
   /**
