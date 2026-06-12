@@ -1,5 +1,5 @@
 /**
- * 🪄 Arcane Academy - Player Entity (PHASE 4)
+ * 🪄 Arcane Academy - Player Entity (PHASE 6)
  */
 
 export default class Player {
@@ -27,6 +27,10 @@ export default class Player {
     this.xp = 0;
     this.xpToNextLevel = 100;
 
+    // Currency
+    this.coins = 0;
+    this.crystals = 0;
+
     // Inventory
     this.inventory = [];
 
@@ -34,43 +38,19 @@ export default class Player {
     this.isShielded = false;
   }
 
-  /**
-   * 🔁 Update
-   */
   update(input) {
     this.handleMovement(input);
     this.regenerateMana();
     this.applyBoundaries();
   }
 
-  /**
-   * ⌨️ Movement
-   */
   handleMovement(input) {
-    if (input.isDown("w")) {
-      console.log("W pressed");
-      this.y -= this.speed;
-    }
-
-    if (input.isDown("s")) {
-      console.log("S pressed");
-      this.y += this.speed;
-    }
-
-    if (input.isDown("a")) {
-      console.log("A pressed");
-      this.x -= this.speed;
-    }
-
-    if (input.isDown("d")) {
-      console.log("D pressed");
-      this.x += this.speed;
-    }
+    if (input.isDown("w")) this.y -= this.speed;
+    if (input.isDown("s")) this.y += this.speed;
+    if (input.isDown("a")) this.x -= this.speed;
+    if (input.isDown("d")) this.x += this.speed;
   }
 
-  /**
-   * 🧱 Screen boundaries
-   */
   applyBoundaries() {
     this.x = Math.max(
       0,
@@ -83,9 +63,6 @@ export default class Player {
     );
   }
 
-  /**
-   * 🔋 Mana regeneration
-   */
   regenerateMana() {
     if (this.mana < this.maxMana) {
       this.mana += 0.05;
@@ -96,9 +73,6 @@ export default class Player {
     }
   }
 
-  /**
-   * ❤️ Take damage
-   */
   takeDamage(amount) {
     if (this.isShielded) {
       amount *= 0.3;
@@ -111,9 +85,6 @@ export default class Player {
     }
   }
 
-  /**
-   * 🔵 Use mana
-   */
   useMana(amount) {
     if (this.mana < amount) {
       return false;
@@ -123,13 +94,11 @@ export default class Player {
     return true;
   }
 
-  /**
-   * ⭐ Gain XP
-   */
   gainXP(amount) {
     this.xp += amount;
 
     while (this.xp >= this.xpToNextLevel) {
+
       this.xp -= this.xpToNextLevel;
 
       this.level++;
@@ -146,21 +115,38 @@ export default class Player {
     }
   }
 
-  /**
-   * 🎒 Inventory
-   */
+  addCoins(amount) {
+    this.coins += amount;
+  }
+
+  addCrystals(amount) {
+    this.crystals += amount;
+  }
+
   addItem(item) {
     this.inventory.push(item);
   }
 
-  /**
-   * 🎨 Render
-   */
   render(ctx) {
-    // Player body
-    ctx.fillStyle = this.isShielded
-      ? "lightblue"
-      : this.color;
+
+    // Shield Aura
+    if (this.isShielded) {
+      ctx.beginPath();
+      ctx.arc(
+        this.x + this.size / 2,
+        this.y + this.size / 2,
+        30,
+        0,
+        Math.PI * 2
+      );
+
+      ctx.strokeStyle = "#7dd3fc";
+      ctx.lineWidth = 3;
+      ctx.stroke();
+    }
+
+    // Body
+    ctx.fillStyle = this.color;
 
     ctx.fillRect(
       this.x,
@@ -180,7 +166,7 @@ export default class Player {
       this.size
     );
 
-    // HP bar
+    // HP
     ctx.fillStyle = "red";
     ctx.fillRect(
       this.x,
@@ -197,7 +183,7 @@ export default class Player {
       5
     );
 
-    // Mana bar
+    // Mana
     ctx.fillStyle = "#38bdf8";
     ctx.fillRect(
       this.x,
@@ -206,7 +192,7 @@ export default class Player {
       4
     );
 
-    // Level text
+    // Level
     ctx.fillStyle = "white";
     ctx.font = "12px Arial";
 
