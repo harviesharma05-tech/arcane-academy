@@ -47,23 +47,23 @@ export default class Player {
    * ⌨️ Movement
    */
   handleMovement(input) {
-
-    // DEBUG
-    console.log(input.keysDown);
-
     if (input.isDown("w")) {
+      console.log("W pressed");
       this.y -= this.speed;
     }
 
     if (input.isDown("s")) {
+      console.log("S pressed");
       this.y += this.speed;
     }
 
     if (input.isDown("a")) {
+      console.log("A pressed");
       this.x -= this.speed;
     }
 
     if (input.isDown("d")) {
+      console.log("D pressed");
       this.x += this.speed;
     }
   }
@@ -157,7 +157,6 @@ export default class Player {
    * 🎨 Render
    */
   render(ctx) {
-
     // Player body
     ctx.fillStyle = this.isShielded
       ? "lightblue"
