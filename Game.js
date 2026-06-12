@@ -6,32 +6,25 @@ import Input from "./Input.js";
 import SceneManager from "./SceneManager.js";
 import GameState from "./GameState.js";
 import HUD from "./HUD.js";
-import AcademyScene from "./AcademyScene.js";
+import AcademyScene from "../scenes/AcademyScene.js";
 
 export default class Game {
   constructor(canvas) {
     this.canvas = canvas;
     this.ctx = canvas.getContext("2d");
 
-    // 🎮 Core Systems
+    // Core Systems
     this.input = new Input();
     this.sceneManager = new SceneManager();
     this.gameState = new GameState();
     this.hud = new HUD();
 
-    // ⏱️ Timing
     this.lastTime = 0;
 
-    // 🎬 Create Scene
+    // Create and register scene
     const academyScene = new AcademyScene(this);
 
-    // Register Scene
-    this.sceneManager.addScene(
-      "academy",
-      academyScene
-    );
-
-    // Start Scene
+    this.sceneManager.addScene("academy", academyScene);
     this.sceneManager.start("academy");
 
     console.log("🪄 Arcane Academy Engine Started");
@@ -61,47 +54,36 @@ export default class Game {
    * 🧠 Update
    */
   update(deltaTime) {
-    try {
-      if (this.gameState?.state === "paused") return;
-      if (this.gameState?.state === "gameover") return;
+    // Pause/Gameover handling
+    if (this.gameState.state === "paused") return;
+    if (this.gameState.state === "gameover") return;
 
-      this.sceneManager.update(deltaTime);
+    // Update current scene
+    this.sceneManager.update(deltaTime);
 
-      if (this.gameState?.update) {
-        this.gameState.update();
-      }
+    // Update game state
+    this.gameState.update();
 
-      if (this.hud?.update) {
-        this.hud.update();
-      }
+    // Update HUD
+    this.hud.update();
 
-      if (this.input?.update) {
-        this.input.update();
-      }
-    } catch (err) {
-      console.error("❌ Update Error:", err);
-    }
+    // IMPORTANT: reset one-frame inputs LAST
+    this.input.update();
   }
 
   /**
    * 🎨 Render
    */
   render() {
-    try {
-      // Background
-      this.ctx.fillStyle = "#0b0f1a";
-      this.ctx.fillRect(
-        0,
-        0,
-        this.canvas.width,
-        this.canvas.height
-      );
+    // Clear screen
+    this.ctx.clearRect(
+      0,
+      0,
+      this.canvas.width,
+      this.canvas.height
+    );
 
-      // Scene
-      this.sceneManager.render(this.ctx);
-
-    } catch (err) {
-      console.error("❌ Render Error:", err);
-    }
+    // Render active scene
+    this.sceneManager.render(this.ctx);
   }
 }
