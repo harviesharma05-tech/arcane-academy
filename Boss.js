@@ -1,75 +1,183 @@
 /**
- * 🧠 Arcane Academy - Boss Enemy
- * Multi-phase AI system
+ * 👑 Arcane Academy - Boss Entity
+ * Phase 6 Boss with Multi-Phase AI
  */
 
 export default class Boss {
   constructor(x, y) {
+    // Position
     this.x = x;
     this.y = y;
 
-    this.size = 60;
-    this.hp = 300;
-    this.maxHP = 300;
+    // Visual
+    this.size = 80;
+    this.color = "purple";
 
+    // Identity
+    this.name = "Archmage Malakar";
+
+    // Stats
+    this.maxHP = 500;
+    this.hp = 500;
+    this.damage = 15;
+
+    // Movement
+    this.speed = 1.5;
+
+    // AI
+    this.state = "idle";
     this.phase = 1;
-    this.speed = 1;
+
+    this.detectionRange = 400;
+    this.attackRange = 70;
   }
 
+  /**
+   * 🔁 Update Boss
+   */
   update(player) {
+    this.updatePhase();
+
     const dx = player.x - this.x;
     const dy = player.y - this.y;
 
-    const dist = Math.sqrt(dx * dx + dy * dy);
+    const distance = Math.sqrt(dx * dx + dy * dy);
 
-    // PHASE SWITCH
-    if (this.hp < 200) this.phase = 2;
-    if (this.hp < 100) this.phase = 3;
-
-    // Behavior changes by phase
-    if (this.phase === 1) {
-      this.x += dx * 0.01;
-      this.y += dy * 0.01;
+    if (distance <= this.attackRange) {
+      this.state = "attack";
+    } else if (distance <= this.detectionRange) {
+      this.state = "chase";
+    } else {
+      this.state = "idle";
     }
 
-    if (this.phase === 2) {
-      this.x += dx * 0.02;
-      this.y += dy * 0.02;
+    if (this.state === "chase") {
+      this.chasePlayer(dx, dy, distance);
     }
 
-    if (this.phase === 3) {
-      this.x += dx * 0.03;
-      this.y += dy * 0.03;
-    }
-
-    // attack
-    if (dist < 50) {
-      player.takeDamage(10);
+    if (this.state === "attack") {
+      this.attackPlayer(player);
     }
   }
 
-  takeDamage(dmg) {
-    this.hp -= dmg;
+  /**
+   * 🧠 Phase System
+   */
+  updatePhase() {
+    const hpPercent = this.hp / this.maxHP;
+
+    if (hpPercent <= 0.3) {
+      this.phase = 3;
+      this.speed = 3;
+      this.damage = 30;
+    } else if (hpPercent <= 0.7) {
+      this.phase = 2;
+      this.speed = 2.2;
+      this.damage = 20;
+    } else {
+      this.phase = 1;
+      this.speed = 1.5;
+      this.damage = 15;
+    }
   }
 
+  /**
+   * 🚶 Chase Player
+   */
+  chasePlayer(dx, dy, distance) {
+    if (distance === 0) return;
+
+    this.x += (dx / distance) * this.speed;
+    this.y += (dy / distance) * this.speed;
+  }
+
+  /**
+   * ⚔ Attack
+   */
+  attackPlayer(player) {
+    player.takeDamage(this.damage);
+  }
+
+  /**
+   * 💥 Take Damage
+   */
+  takeDamage(amount) {
+    this.hp -= amount;
+
+    if (this.hp < 0) {
+      this.hp = 0;
+    }
+  }
+
+  /**
+   * ☠ Dead?
+   */
+  isDead() {
+    return this.hp <= 0;
+  }
+
+  /**
+   * 🎨 Render
+   */
   render(ctx) {
-    ctx.fillStyle = "purple";
-    ctx.fillRect(this.x, this.y, this.size, this.size);
+    // Body
+    ctx.fillStyle = this.color;
 
-    // HP bar
-    ctx.fillStyle = "red";
-    ctx.fillRect(this.x, this.y - 10, this.size, 5);
-
-    ctx.fillStyle = "lime";
     ctx.fillRect(
       this.x,
-      this.y - 10,
-      this.size * (this.hp / this.maxHP),
-      5
+      this.y,
+      this.size,
+      this.size
     );
 
+    // Border
+    ctx.strokeStyle = "white";
+    ctx.lineWidth = 3;
+
+    ctx.strokeRect(
+      this.x,
+      this.y,
+      this.size,
+      this.size
+    );
+
+    // HP Bar Background
+    ctx.fillStyle = "black";
+
+    ctx.fillRect(
+      this.x,
+      this.y - 20,
+      this.size,
+      8
+    );
+
+    // HP Bar
+    ctx.fillStyle = "red";
+
+    ctx.fillRect(
+      this.x,
+      this.y - 20,
+      this.size * (this.hp / this.maxHP),
+      8
+    );
+
+    // Name
     ctx.fillStyle = "white";
-    ctx.font = "10px monospace";
-    ctx.fillText(`BOSS P${this.phase}`, this.x, this.y - 15);
+    ctx.font = "14px Arial";
+
+    ctx.fillText(
+      this.name,
+      this.x,
+      this.y - 30
+    );
+
+    // Phase Indicator
+    ctx.fillStyle = "yellow";
+
+    ctx.fillText(
+      `Phase ${this.phase}`,
+      this.x,
+      this.y + this.size + 20
+    );
   }
 }
