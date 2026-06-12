@@ -11,37 +11,42 @@ export default class Input {
   }
 
   initListeners() {
-    window.addEventListener("keydown", (e) => {
+
+    const handleKeyDown = (e) => {
       let key = e.key.toLowerCase();
 
-      // Normalize Space key
       if (e.code === "Space") {
         key = "space";
       }
 
-      // Prevent browser scrolling
-      if (
-        ["space", "w", "a", "s", "d", "shift"].includes(key)
-      ) {
-        e.preventDefault();
-      }
+      console.log("KEY DOWN:", key);
+
+      e.preventDefault();
 
       if (!this.keysDown[key]) {
         this.keysPressed[key] = true;
       }
 
       this.keysDown[key] = true;
-    });
+    };
 
-    window.addEventListener("keyup", (e) => {
+    const handleKeyUp = (e) => {
       let key = e.key.toLowerCase();
 
       if (e.code === "Space") {
         key = "space";
       }
 
+      console.log("KEY UP:", key);
+
       this.keysDown[key] = false;
-    });
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("keyup", handleKeyUp);
+
+    document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("keyup", handleKeyUp);
   }
 
   isDown(key) {
