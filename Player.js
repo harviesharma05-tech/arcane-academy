@@ -1,6 +1,5 @@
 /**
  * 🪄 Arcane Academy - Player Entity (PHASE 4)
- * Movement + HP + Mana + XP + Level System
  */
 
 export default class Player {
@@ -48,14 +47,29 @@ export default class Player {
    * ⌨️ Movement
    */
   handleMovement(input) {
-    if (input.isDown("w")) this.y -= this.speed;
-    if (input.isDown("s")) this.y += this.speed;
-    if (input.isDown("a")) this.x -= this.speed;
-    if (input.isDown("d")) this.x += this.speed;
+
+    // DEBUG
+    console.log(input.keysDown);
+
+    if (input.isDown("w")) {
+      this.y -= this.speed;
+    }
+
+    if (input.isDown("s")) {
+      this.y += this.speed;
+    }
+
+    if (input.isDown("a")) {
+      this.x -= this.speed;
+    }
+
+    if (input.isDown("d")) {
+      this.x += this.speed;
+    }
   }
 
   /**
-   * 🧱 Screen Boundaries
+   * 🧱 Screen boundaries
    */
   applyBoundaries() {
     this.x = Math.max(
@@ -70,7 +84,7 @@ export default class Player {
   }
 
   /**
-   * 🔋 Mana Regen
+   * 🔋 Mana regeneration
    */
   regenerateMana() {
     if (this.mana < this.maxMana) {
@@ -83,7 +97,7 @@ export default class Player {
   }
 
   /**
-   * ❤️ Damage
+   * ❤️ Take damage
    */
   takeDamage(amount) {
     if (this.isShielded) {
@@ -98,7 +112,7 @@ export default class Player {
   }
 
   /**
-   * 🔋 Mana Usage
+   * 🔵 Use mana
    */
   useMana(amount) {
     if (this.mana < amount) {
@@ -110,7 +124,7 @@ export default class Player {
   }
 
   /**
-   * ⭐ XP System
+   * ⭐ Gain XP
    */
   gainXP(amount) {
     this.xp += amount;
@@ -120,7 +134,6 @@ export default class Player {
 
       this.level++;
 
-      // Rewards
       this.maxHP += 20;
       this.maxMana += 20;
 
@@ -129,9 +142,7 @@ export default class Player {
 
       this.xpToNextLevel += 50;
 
-      console.log(
-        `⭐ LEVEL UP! Now Level ${this.level}`
-      );
+      console.log(`⭐ Level Up! Level ${this.level}`);
     }
   }
 
@@ -146,7 +157,8 @@ export default class Player {
    * 🎨 Render
    */
   render(ctx) {
-    // Player Body
+
+    // Player body
     ctx.fillStyle = this.isShielded
       ? "lightblue"
       : this.color;
@@ -169,7 +181,7 @@ export default class Player {
       this.size
     );
 
-    // HP Bar
+    // HP bar
     ctx.fillStyle = "red";
     ctx.fillRect(
       this.x,
@@ -186,7 +198,7 @@ export default class Player {
       5
     );
 
-    // Mana Bar
+    // Mana bar
     ctx.fillStyle = "#38bdf8";
     ctx.fillRect(
       this.x,
@@ -195,7 +207,7 @@ export default class Player {
       4
     );
 
-    // Level Text
+    // Level text
     ctx.fillStyle = "white";
     ctx.font = "12px Arial";
 
