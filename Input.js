@@ -1,14 +1,14 @@
 /**
  * 🎮 Arcane Academy - Input System
- * Handles keyboard input state tracking (real-time + clean API)
+ * Handles keyboard input
  */
 
 export default class Input {
   constructor() {
-    // Stores currently pressed keys
+    // Keys currently being held down
     this.keysDown = {};
 
-    // Stores just-pressed keys (useful for single actions like spell casting)
+    // Keys pressed this frame
     this.keysPressed = {};
 
     this.initListeners();
@@ -21,37 +21,38 @@ export default class Input {
     window.addEventListener("keydown", (e) => {
       const key = e.key.toLowerCase();
 
-      // Prevent repeat firing when key is held
+      // Register one-time press
       if (!this.keysDown[key]) {
         this.keysPressed[key] = true;
       }
 
+      // Register held key
       this.keysDown[key] = true;
     });
 
     window.addEventListener("keyup", (e) => {
       const key = e.key.toLowerCase();
-      this.keysDown[key] = false;
+
+      delete this.keysDown[key];
     });
   }
 
   /**
-   * 🧠 Check if key is being held down
+   * 🧠 Is key currently held?
    */
   isDown(key) {
     return !!this.keysDown[key.toLowerCase()];
   }
 
   /**
-   * ⚡ Check if key was just pressed (single frame action)
+   * ⚡ Was key just pressed?
    */
   isPressed(key) {
     return !!this.keysPressed[key.toLowerCase()];
   }
 
   /**
-   * 🔄 Reset "pressed" state every frame
-   * (IMPORTANT: call this in game loop if using isPressed)
+   * 🔄 Reset single-frame presses
    */
   update() {
     this.keysPressed = {};
