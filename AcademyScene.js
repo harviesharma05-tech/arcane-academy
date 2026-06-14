@@ -9,8 +9,15 @@ import NPC from "../entities/NPC.js";
 import CombatSystem from "../systems/CombatSystem.js";
 import SpellSystem from "../systems/SpellSystem.js";
 import ProjectileSystem from "../systems/ProjectileSystem.js";
+
 import QuestSystem from "../systems/QuestSystem.js";
 import DialogueSystem from "../systems/DialogueSystem.js";
+import EconomySystem from "../systems/EconomySystem.js";
+import PotionSystem from "../systems/PotionSystem.js";
+import ShopSystem from "../systems/ShopSystem.js";
+import DayNightSystem from "../systems/DayNightSystem.js";
+import WeatherSystem from "../systems/WeatherSystem.js";
+import SaveSystem from "../systems/SaveSystem.js";
 
 export default class AcademyScene {
   constructor(game) {
@@ -25,16 +32,10 @@ export default class AcademyScene {
     console.log("🏰 Academy Scene Initialized");
 
     // Player
-    this.player = new Player(
-      150,
-      150
-    );
+    this.player = new Player(150, 150);
 
     // Enemy
-    this.enemy = new Enemy(
-      500,
-      250
-    );
+    this.enemy = new Enemy(500, 250);
 
     // NPC
     this.masterWizard = new NPC(
@@ -44,44 +45,61 @@ export default class AcademyScene {
     );
 
     // Systems
-    this.projectiles =
-      new ProjectileSystem(
-        this.enemy,
-        this.player
-      );
+    this.projectiles = new ProjectileSystem(
+      this.enemy,
+      this.player
+    );
 
-    this.questSystem =
-      new QuestSystem(
-        this.player
-      );
+    this.spellSystem = new SpellSystem(
+      this.player,
+      this.enemy,
+      this.projectiles
+    );
 
-    this.combat =
-      new CombatSystem(
-        this.player,
-        this.enemy,
-        this.questSystem
-      );
+    this.questSystem = new QuestSystem(
+      this.player
+    );
 
-    this.spellSystem =
-      new SpellSystem(
-        this.player,
-        this.enemy,
-        this.projectiles
-      );
+    this.combat = new CombatSystem(
+      this.player,
+      this.enemy,
+      this.questSystem
+    );
 
     this.dialogueSystem =
       new DialogueSystem();
+
+    this.economySystem =
+      new EconomySystem();
+
+    this.potionSystem =
+      new PotionSystem(
+        this.player
+      );
+
+    this.shopSystem =
+      new ShopSystem(
+        this.economySystem,
+        this.potionSystem
+      );
+
+    this.dayNightSystem =
+      new DayNightSystem();
+
+    this.weatherSystem =
+      new WeatherSystem();
+
+    this.saveSystem =
+      new SaveSystem();
 
     // HUD
     this.game.hud.player =
       this.player;
 
-    // Game State
-    this.game.gameState.player =
-      this.player;
-
-    this.game.gameState.enemy =
-      this.enemy;
+    // Load save
+    this.saveSystem.load(
+      this.player
+    );
 
     console.log(
       "✅ Academy Scene Ready"
@@ -121,37 +139,43 @@ export default class AcademyScene {
 
     }
 
+    // Save game
+    if (
+      input.isPressed("p")
+    ) {
+
+      this.saveSystem.save(
+        this.player
+      );
+
+    }
+
+    // Potions
+    if (
+      input.isPressed("1")
+    ) {
+
+      this.potionSystem.useHealthPotion();
+
+    }
+
+    if (
+      input.isPressed("2")
+    ) {
+
+      this.potionSystem.useManaPotion();
+
+    }
+
     // Enemy AI
     this.enemy.update(
       this.player
     );
 
-    // NPC animation
+    // NPC
     this.masterWizard.update();
 
-    // Start dialogue
-    if (
-      this.masterWizard.isNear(
-        this.player
-      ) &&
-      input.isPressed("e") &&
-      !this.dialogueSystem.isActive
-    ) {
-
-      this.dialogueSystem.start(
-        "Master Wizard",
-        [
-          "Welcome to Arcane Academy.",
-          "Defeat enemies to gain XP.",
-          "Use SPACE to cast Fireball.",
-          "Use SHIFT for Shield.",
-          "Good luck, apprentice!"
-        ]
-      );
-
-    }
-
-    // Dialogue update
+    // Dialogue
     this.dialogueSystem.update(
       input
     );
@@ -159,13 +183,13 @@ export default class AcademyScene {
     // Systems
     this.projectiles.update();
 
-    this.combat.update(
-      deltaTime
-    );
+    this.combat.update();
 
-    this.spellSystem.update(
-      deltaTime
-    );
+    this.spellSystem.update();
+
+    this.dayNightSystem.update();
+
+    this.weatherSystem.update();
   }
 
   /**
@@ -174,8 +198,7 @@ export default class AcademyScene {
   render(ctx) {
 
     // Background
-    ctx.fillStyle =
-      "#0b0f1a";
+    ctx.fillStyle = "#0b0f1a";
 
     ctx.fillRect(
       0,
@@ -185,11 +208,9 @@ export default class AcademyScene {
     );
 
     // Title
-    ctx.fillStyle =
-      "#7dd3fc";
+    ctx.fillStyle = "#7dd3fc";
 
-    ctx.font =
-      "28px Arial";
+    ctx.font = "28px Arial";
 
     ctx.fillText(
       "🪄 Arcane Academy V0.8.0",
@@ -198,11 +219,9 @@ export default class AcademyScene {
     );
 
     // Controls
-    ctx.fillStyle =
-      "white";
+    ctx.fillStyle = "white";
 
-    ctx.font =
-      "16px Arial";
+    ctx.font = "16px Arial";
 
     ctx.fillText(
       "WASD = Move",
@@ -223,9 +242,21 @@ export default class AcademyScene {
     );
 
     ctx.fillText(
-      "E = Talk",
+      "1 = Health Potion",
       20,
       155
+    );
+
+    ctx.fillText(
+      "2 = Mana Potion",
+      20,
+      180
+    );
+
+    ctx.fillText(
+      "P = Save Game",
+      20,
+      205
     );
 
     // Entities
@@ -236,25 +267,21 @@ export default class AcademyScene {
     this.masterWizard.render(ctx);
 
     // Systems
-    this.projectiles.render(
-      ctx
-    );
+    this.projectiles.render(ctx);
 
-    this.combat.render(
-      ctx
-    );
+    this.combat.render(ctx);
 
-    this.spellSystem.render(
-      ctx
-    );
+    this.spellSystem.render(ctx);
 
-    this.questSystem.render(
-      ctx
-    );
+    this.questSystem.render(ctx);
 
-    this.dialogueSystem.render(
-      ctx
-    );
+    this.economySystem.render(ctx);
+
+    this.dialogueSystem.render(ctx);
+
+    this.weatherSystem.render(ctx);
+
+    this.dayNightSystem.render(ctx);
   }
 
   /**
