@@ -1,14 +1,16 @@
 /**
- * ⚔️ Arcane Academy V0.8.0
- * Combat System
- * Handles enemy defeat, XP rewards, quest progress and respawning
+ * ⚔️ Arcane Academy - Combat System (V0.8.0)
+ * Handles enemy defeat, XP rewards, gold rewards, quest progress and respawning
  */
 
 export default class CombatSystem {
-  constructor(player, enemy, questSystem = null) {
+  constructor(player, enemy, questSystem = null, economySystem = null) {
+
     this.player = player;
     this.enemy = enemy;
+
     this.questSystem = questSystem;
+    this.economySystem = economySystem;
 
     this.killCount = 0;
   }
@@ -23,20 +25,34 @@ export default class CombatSystem {
 
       this.killCount++;
 
-      // Give XP
+      // XP reward
       this.player.gainXP(25);
 
-      // Update quests
+      // Gold reward
+      if (this.economySystem) {
+
+        const goldReward =
+          10 + Math.floor(Math.random() * 16);
+
+        this.economySystem.addGold(
+          goldReward
+        );
+      }
+
+      // Quest progress
       if (this.questSystem) {
+
         this.questSystem.enemyKilled();
+
       }
 
       console.log(
-        `👾 Enemy defeated | Kills: ${this.killCount}`
+        `👾 Enemy Defeated | Kills: ${this.killCount}`
       );
 
       // Respawn enemy
-      this.enemy.hp = this.enemy.maxHP;
+      this.enemy.hp =
+        this.enemy.maxHP;
 
       this.enemy.x =
         400 + Math.random() * 500;
@@ -71,6 +87,5 @@ export default class CombatSystem {
       20,
       310
     );
-
   }
 }
