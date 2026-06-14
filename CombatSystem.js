@@ -1,12 +1,14 @@
 /**
- * ⚔️ Arcane Academy - Combat System
- * Handles enemy defeat, XP rewards, and respawning
+ * ⚔️ Arcane Academy V0.8.0
+ * Combat System
+ * Handles enemy defeat, XP rewards, quest progress and respawning
  */
 
 export default class CombatSystem {
-  constructor(player, enemy) {
+  constructor(player, enemy, questSystem = null) {
     this.player = player;
     this.enemy = enemy;
+    this.questSystem = questSystem;
 
     this.killCount = 0;
   }
@@ -15,29 +17,32 @@ export default class CombatSystem {
    * 🔁 Update Combat
    */
   update() {
+
     // Enemy defeated
     if (this.enemy.hp <= 0) {
+
       this.killCount++;
 
-      // XP Reward
-      if (this.player.gainXP) {
-        this.player.gainXP(25);
-      } else {
-        this.player.xp += 25;
+      // Give XP
+      this.player.gainXP(25);
+
+      // Update quests
+      if (this.questSystem) {
+        this.questSystem.enemyKilled();
       }
 
       console.log(
-        `⭐ Enemy Defeated | Kills: ${this.killCount}`
+        `👾 Enemy defeated | Kills: ${this.killCount}`
       );
 
-      // Respawn Enemy
+      // Respawn enemy
       this.enemy.hp = this.enemy.maxHP;
 
       this.enemy.x =
-        400 + Math.random() * 400;
+        400 + Math.random() * 500;
 
       this.enemy.y =
-        100 + Math.random() * 300;
+        100 + Math.random() * 400;
     }
   }
 
@@ -45,25 +50,27 @@ export default class CombatSystem {
    * 🎨 Render Combat Stats
    */
   render(ctx) {
+
     ctx.fillStyle = "white";
-    ctx.font = "14px Arial";
+    ctx.font = "16px Arial";
 
     ctx.fillText(
-      `XP: ${this.player.xp}`,
+      `👾 Kills: ${this.killCount}`,
       20,
-      180
+      260
     );
 
     ctx.fillText(
-      `Kills: ${this.killCount}`,
+      `⭐ XP: ${this.player.xp}/${this.player.xpToNextLevel}`,
       20,
-      205
+      285
     );
 
     ctx.fillText(
-      `Enemy HP: ${Math.floor(this.enemy.hp)}`,
+      `❤️ Enemy HP: ${Math.floor(this.enemy.hp)}`,
       20,
-      230
+      310
     );
+
   }
 }
