@@ -1,10 +1,11 @@
 /**
  * 👾 Arcane Academy - Enemy Entity
- * Basic AI: idle movement, player detection, chase & attack
+ * VERSION 9
  */
 
 export default class Enemy {
   constructor(x, y) {
+
     // Position
     this.x = x;
     this.y = y;
@@ -14,17 +15,26 @@ export default class Enemy {
     this.color = "red";
 
     // Stats
-    this.hp = 100;
     this.maxHP = 100;
+    this.hp = 100;
+
     this.damage = 5;
 
-    // AI
-    this.speed = 1.5;
-    this.state = "idle"; // idle | chase | attack
+    // Rewards
+    this.goldReward = 20;
+    this.xpReward = 25;
 
-    // Behavior
-    this.detectionRange = 180;
-    this.attackRange = 40;
+    // AI
+    this.speed = 1.8;
+
+    this.state = "idle";
+
+    this.detectionRange = 220;
+    this.attackRange = 45;
+
+    // Attack Cooldown
+    this.attackCooldown = 1000;
+    this.lastAttack = 0;
 
     // Movement
     this.velocityX = 0;
@@ -32,96 +42,189 @@ export default class Enemy {
   }
 
   /**
-   * 🔁 Update AI logic
+   * 🔁 Update
    */
   update(player) {
+
     const dx = player.x - this.x;
     const dy = player.y - this.y;
-    const distance = Math.sqrt(dx * dx + dy * dy);
 
-    // AI STATE DECISION
+    const distance =
+      Math.sqrt(dx * dx + dy * dy);
+
+    // AI Decision
     if (distance < this.attackRange) {
+
       this.state = "attack";
-    } else if (distance < this.detectionRange) {
+
+    } else if (
+      distance < this.detectionRange
+    ) {
+
       this.state = "chase";
+
     } else {
+
       this.state = "idle";
     }
 
-    // STATE BEHAVIOR
-    if (this.state === "chase") {
-      this.chasePlayer(dx, dy, distance);
-    }
+    // Execute State
+    switch (this.state) {
 
-    if (this.state === "attack") {
-      this.attackPlayer(player);
-    }
+      case "idle":
+        this.idleMovement();
+        break;
 
-    if (this.state === "idle") {
-      this.idleMovement();
+      case "chase":
+        this.chasePlayer(
+          dx,
+          dy,
+          distance
+        );
+        break;
+
+      case "attack":
+        this.attackPlayer(player);
+        break;
     }
   }
 
   /**
-   * 🧠 Chase player behavior
+   * 😴 Idle
    */
-  chasePlayer(dx, dy, distance) {
-    this.velocityX = (dx / distance) * this.speed;
-    this.velocityY = (dy / distance) * this.speed;
+  idleMovement() {
+
+    this.x +=
+      Math.sin(Date.now() / 500) * 0.3;
+
+    this.y +=
+      Math.cos(Date.now() / 500) * 0.3;
+  }
+
+  /**
+   * 🏃 Chase
+   */
+  chasePlayer(
+    dx,
+    dy,
+    distance
+  ) {
+
+    if (distance === 0) return;
+
+    this.velocityX =
+      (dx / distance) * this.speed;
+
+    this.velocityY =
+      (dy / distance) * this.speed;
 
     this.x += this.velocityX;
     this.y += this.velocityY;
   }
 
   /**
-   * ⚔️ Attack player
+   * ⚔️ Attack
    */
   attackPlayer(player) {
-    // simple damage tick (can be upgraded to cooldown system)
-    player.takeDamage(this.damage);
+
+    const now = Date.now();
+
+    if (
+      now - this.lastAttack <
+      this.attackCooldown
+    ) {
+      return;
+    }
+
+    this.lastAttack = now;
+
+    player.takeDamage(
+      this.damage
+    );
   }
 
   /**
-   * 😴 Idle movement (small random motion)
-   */
-  idleMovement() {
-    this.x += Math.sin(Date.now() / 500) * 0.3;
-    this.y += Math.cos(Date.now() / 500) * 0.3;
-  }
-
-  /**
-   * 💥 Take damage
+   * 💥 Damage
    */
   takeDamage(amount) {
+
     this.hp -= amount;
 
-    if (this.hp < 0) this.hp = 0;
+    if (this.hp < 0) {
+      this.hp = 0;
+    }
   }
 
   /**
-   * 🎨 Render enemy
+   * 🔄 Scale For Dungeon Floor
+   */
+  scaleForFloor(floor) {
+
+    this.maxHP =
+      100 + floor * 30;
+
+    this.hp =
+      this.maxHP;
+
+    this.damage =
+      5 + floor * 2;
+
+    this.goldReward =
+      20 + floor * 10;
+
+    this.xpReward =
+      25 + floor * 15;
+  }
+
+  /**
+   * 🎨 Render
    */
   render(ctx) {
-    // Enemy body
-    ctx.fillStyle = this.color;
-    ctx.fillRect(this.x, this.y, this.size, this.size);
 
-    // HP bar background
+    // Body
+    ctx.fillStyle =
+      this.state === "attack"
+        ? "#ff4444"
+        : this.color;
+
+    ctx.fillRect(
+      this.x,
+      this.y,
+      this.size,
+      this.size
+    );
+
+    // HP Background
     ctx.fillStyle = "black";
-    ctx.fillRect(this.x, this.y - 10, this.size, 5);
 
-    // HP bar fill
-    ctx.fillStyle = "lime";
     ctx.fillRect(
       this.x,
       this.y - 10,
-      this.size * (this.hp / this.maxHP),
+      this.size,
       5
     );
 
-    // State indicator (debug useful for recruiters)
+    // HP Fill
+    ctx.fillStyle = "lime";
+
+    ctx.fillRect(
+      this.x,
+      this.y - 10,
+      this.size *
+        (this.hp / this.maxHP),
+      5
+    );
+
+    // State
     ctx.fillStyle = "white";
-    ctx.font = "10px monospace";
-    ctx.fillText(this.state, this.x, this.y - 15);
+
+    ctx.font =
+      "10px monospace";
+
+    ctx.fillText(
+      this.state,
+      this.x,
+      this.y - 15
+    );
   }
 }
