@@ -1,5 +1,6 @@
 /**
- * 🖥 Arcane Academy - HUD System (PHASE 6)
+ * 🖥️ Arcane Academy - HUD
+ * VERSION 9
  */
 
 export default class HUD {
@@ -10,9 +11,7 @@ export default class HUD {
   /**
    * 🔁 Update
    */
-  update() {
-    // Future notifications and animations
-  }
+  update() {}
 
   /**
    * 🎨 Render
@@ -20,18 +19,18 @@ export default class HUD {
   render(ctx) {
     if (!this.player) return;
 
-    // Background panel
-    ctx.fillStyle = "rgba(0,0,0,0.7)";
-    ctx.fillRect(10, 10, 260, 220);
+    // Background Panel
+    ctx.fillStyle = "rgba(0,0,0,0.75)";
+    ctx.fillRect(10, 10, 280, 180);
 
     // Border
     ctx.strokeStyle = "#7dd3fc";
     ctx.lineWidth = 2;
-    ctx.strokeRect(10, 10, 260, 220);
+    ctx.strokeRect(10, 10, 280, 180);
 
-    // Text style
+    // Text Style
     ctx.fillStyle = "white";
-    ctx.font = "16px Arial";
+    ctx.font = "16px monospace";
 
     // HP
     ctx.fillText(
@@ -56,21 +55,21 @@ export default class HUD {
 
     // XP
     ctx.fillText(
-      `⚡ XP: ${this.player.xp}/${this.player.xpToNextLevel}`,
+      `✨ XP: ${this.player.xp}/${this.player.xpToNextLevel}`,
       20,
       110
     );
 
-    // Coins
+    // Gold
     ctx.fillText(
-      `🪙 Coins: ${this.player.coins}`,
+      `💰 Gold: ${this.player.gold}`,
       20,
       135
     );
 
-    // Crystals
+    // Dungeon Floor
     ctx.fillText(
-      `💎 Crystals: ${this.player.crystals}`,
+      `🏰 Floor: ${this.player.dungeonFloor}`,
       20,
       160
     );
@@ -82,17 +81,34 @@ export default class HUD {
       185
     );
 
-    // Shield Status
-    ctx.fillStyle = this.player.isShielded
-      ? "#38bdf8"
-      : "gray";
+    // XP Progress Bar
+    ctx.fillStyle = "#333";
 
-    ctx.fillText(
-      this.player.isShielded
-        ? "🛡 Shield Active"
-        : "🛡 Shield Inactive",
+    ctx.fillRect(
       20,
-      210
+      200,
+      240,
+      12
+    );
+
+    ctx.fillStyle = "#facc15";
+
+    ctx.fillRect(
+      20,
+      200,
+      240 *
+        (this.player.xp /
+          this.player.xpToNextLevel),
+      12
+    );
+
+    ctx.strokeStyle = "white";
+
+    ctx.strokeRect(
+      20,
+      200,
+      240,
+      12
     );
   }
 }
