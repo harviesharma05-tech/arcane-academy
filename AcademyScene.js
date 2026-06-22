@@ -1,6 +1,6 @@
 /**
  * 🏰 Arcane Academy - Main Gameplay Scene
- * VERSION 8
+ * VERSION 9
  */
 
 import Player from "./Player.js";
@@ -11,45 +11,31 @@ import CombatSystem from "./CombatSystem.js";
 import SpellSystem from "./SpellSystem.js";
 import ProjectileSystem from "./ProjectileSystem.js";
 
-import QuestSystem from "./QuestSystem.js";
-import DialogueSystem from "./DialogueSystem.js";
-import ShopSystem from "./ShopSystem.js";
-import PotionSystem from "./PotionSystem.js";
-import SaveSystem from "./SaveSystem.js";
-import EconomySystem from "./EconomySystem.js";
-import DayNightSystem from "./DayNightSystem.js";
-import WeatherSystem from "./WeatherSystem.js";
-
 export default class AcademyScene {
   constructor(game) {
     this.game = game;
   }
 
-  /**
-   * 🎬 Initialize Scene
-   */
   init() {
-
     console.log("🏰 Academy Scene Loaded");
 
-    // ======================
-    // PLAYER
-    // ======================
+    // Player
     this.player = new Player(150, 150);
 
-    // ======================
-    // ENEMY
-    // ======================
+    // Enemy
     this.enemy = new Enemy(500, 250);
 
-    // ======================
     // NPC
-    // ======================
-    this.npc = new NPC(300, 300);
+    this.npc = new NPC(350, 300);
 
-    // ======================
-    // SYSTEMS
-    // ======================
+    // Dungeon Portal
+    this.dungeonPortal = {
+      x: 900,
+      y: 250,
+      size: 80
+    };
+
+    // Systems
     this.projectiles = new ProjectileSystem(
       this.enemy,
       this.player
@@ -66,96 +52,62 @@ export default class AcademyScene {
       this.projectiles
     );
 
-    this.questSystem = new QuestSystem();
-
-    this.dialogueSystem = new DialogueSystem();
-
-    this.shopSystem = new ShopSystem();
-
-    this.potionSystem = new PotionSystem(
-      this.player
-    );
-
-    this.saveSystem = new SaveSystem();
-
-    this.economySystem = new EconomySystem();
-
-    this.dayNightSystem = new DayNightSystem();
-
-    this.weatherSystem = new WeatherSystem();
-
-    // ======================
     // HUD
-    // ======================
     this.game.hud.player = this.player;
 
-    // ======================
-    // GAME STATE
-    // ======================
+    // Game State
     this.game.gameState.player = this.player;
     this.game.gameState.enemy = this.enemy;
 
-    console.log("✅ Version 8 Ready");
+    console.log("✅ Academy Ready");
   }
 
-  /**
-   * 🔁 Update
-   */
   update(deltaTime) {
-
     const input = this.game.input;
 
     // Player
     this.player.update(input);
 
-    // Enemy AI
+    // Enemy
     this.enemy.update(this.player);
 
-    // Systems
-    this.projectiles.update();
-
-    this.combat.update(deltaTime);
-
-    this.spellSystem.update(deltaTime);
-
-    this.dayNightSystem.update();
-
-    this.weatherSystem.update();
-
-    // ======================
-    // SPELLS
-    // ======================
+    // Fireball
     if (input.isPressed("space")) {
       this.spellSystem.cast("fireball");
     }
 
+    // Shield
     if (input.isPressed("shift")) {
       this.spellSystem.cast("shield");
     }
 
-    // ======================
-    // POTION
-    // ======================
-    if (input.isPressed("h")) {
-      this.potionSystem.useHealthPotion();
-    }
+    // Systems
+    this.projectiles.update();
+    this.combat.update(deltaTime);
+    this.spellSystem.update(deltaTime);
 
-    // ======================
-    // SAVE GAME
-    // ======================
-    if (input.isPressed("p")) {
-      this.saveSystem.save(this.player);
-    }
+    // Portal Collision
+    const p = this.player;
+    const portal = this.dungeonPortal;
 
+    const touchingPortal =
+      p.x < portal.x + portal.size &&
+      p.x + p.size > portal.x &&
+      p.y < portal.y + portal.size &&
+      p.y + p.size > portal.y;
+
+    if (touchingPortal) {
+      console.log("🌀 Entering Dungeon");
+
+      this.game.sceneManager.switchScene(
+        "dungeon"
+      );
+    }
   }
 
-  /**
-   * 🎨 Render
-   */
   render(ctx) {
-
     // Background
-    ctx.fillStyle = "#0b1020";
+    ctx.fillStyle = "#0b0f1a";
     ctx.fillRect(
       0,
       0,
@@ -168,7 +120,7 @@ export default class AcademyScene {
     ctx.font = "28px Arial";
 
     ctx.fillText(
-      "🪄 Arcane Academy V8",
+      "🪄 Arcane Academy V9",
       20,
       40
     );
@@ -195,45 +147,42 @@ export default class AcademyScene {
       130
     );
 
-    ctx.fillText(
-      "H = Health Potion",
-      20,
-      155
+    // Portal
+    ctx.fillStyle = "purple";
+
+    ctx.fillRect(
+      this.dungeonPortal.x,
+      this.dungeonPortal.y,
+      this.dungeonPortal.size,
+      this.dungeonPortal.size
     );
 
+    ctx.fillStyle = "white";
+
     ctx.fillText(
-      "P = Save Game",
-      20,
-      180
+      "Dungeon",
+      this.dungeonPortal.x - 10,
+      this.dungeonPortal.y - 10
     );
 
-    // ======================
-    // ENTITIES
-    // ======================
+    // Entities
     this.player.render(ctx);
 
     this.enemy.render(ctx);
 
-    this.npc.render(ctx);
+    if (this.npc && this.npc.render) {
+      this.npc.render(ctx);
+    }
 
-    // ======================
-    // SYSTEMS
-    // ======================
+    // Systems
     this.projectiles.render(ctx);
 
     this.combat.render(ctx);
 
     this.spellSystem.render(ctx);
-
-    this.dayNightSystem.render(ctx);
-
-    this.weatherSystem.render(ctx);
   }
 
-  /**
-   * 🚪 Cleanup
-   */
   unload() {
-    console.log("Leaving Academy Scene");
+    console.log("🚪 Leaving Academy");
   }
 }
