@@ -1,9 +1,11 @@
 /**
- * 🪄 Arcane Academy - Player Entity (PHASE 6)
+ * 🪄 Arcane Academy - Player Entity
+ * VERSION 9
  */
 
 export default class Player {
   constructor(x, y) {
+
     // Position
     this.x = x;
     this.y = y;
@@ -15,10 +17,11 @@ export default class Player {
     // Movement
     this.speed = 6;
 
-    // Stats
+    // Health
     this.maxHP = 100;
     this.hp = 100;
 
+    // Mana
     this.maxMana = 100;
     this.mana = 100;
 
@@ -27,9 +30,15 @@ export default class Player {
     this.xp = 0;
     this.xpToNextLevel = 100;
 
-    // Currency
-    this.coins = 0;
-    this.crystals = 0;
+    // Economy
+    this.gold = 0;
+
+    // Combat
+    this.attackPower = 10;
+    this.critChance = 5;
+
+    // Dungeon
+    this.dungeonFloor = 1;
 
     // Inventory
     this.inventory = [];
@@ -38,33 +47,66 @@ export default class Player {
     this.isShielded = false;
   }
 
+  /**
+   * 🔁 Update
+   */
   update(input) {
     this.handleMovement(input);
     this.regenerateMana();
     this.applyBoundaries();
   }
 
+  /**
+   * ⌨️ Movement
+   */
   handleMovement(input) {
-    if (input.isDown("w")) this.y -= this.speed;
-    if (input.isDown("s")) this.y += this.speed;
-    if (input.isDown("a")) this.x -= this.speed;
-    if (input.isDown("d")) this.x += this.speed;
+
+    if (input.isDown("w")) {
+      this.y -= this.speed;
+    }
+
+    if (input.isDown("s")) {
+      this.y += this.speed;
+    }
+
+    if (input.isDown("a")) {
+      this.x -= this.speed;
+    }
+
+    if (input.isDown("d")) {
+      this.x += this.speed;
+    }
   }
 
+  /**
+   * 🧱 Boundaries
+   */
   applyBoundaries() {
+
     this.x = Math.max(
       0,
-      Math.min(window.innerWidth - this.size, this.x)
+      Math.min(
+        window.innerWidth - this.size,
+        this.x
+      )
     );
 
     this.y = Math.max(
       0,
-      Math.min(window.innerHeight - this.size, this.y)
+      Math.min(
+        window.innerHeight - this.size,
+        this.y
+      )
     );
   }
 
+  /**
+   * 🔋 Mana Regen
+   */
   regenerateMana() {
+
     if (this.mana < this.maxMana) {
+
       this.mana += 0.05;
 
       if (this.mana > this.maxMana) {
@@ -73,7 +115,11 @@ export default class Player {
     }
   }
 
+  /**
+   * ❤️ Damage
+   */
   takeDamage(amount) {
+
     if (this.isShielded) {
       amount *= 0.3;
     }
@@ -85,19 +131,42 @@ export default class Player {
     }
   }
 
+  /**
+   * 💚 Heal
+   */
+  heal(amount) {
+
+    this.hp += amount;
+
+    if (this.hp > this.maxHP) {
+      this.hp = this.maxHP;
+    }
+  }
+
+  /**
+   * 🔵 Mana Use
+   */
   useMana(amount) {
+
     if (this.mana < amount) {
       return false;
     }
 
     this.mana -= amount;
+
     return true;
   }
 
+  /**
+   * ⭐ XP
+   */
   gainXP(amount) {
+
     this.xp += amount;
 
-    while (this.xp >= this.xpToNextLevel) {
+    while (
+      this.xp >= this.xpToNextLevel
+    ) {
 
       this.xp -= this.xpToNextLevel;
 
@@ -111,42 +180,47 @@ export default class Player {
 
       this.xpToNextLevel += 50;
 
-      console.log(`⭐ Level Up! Level ${this.level}`);
+      console.log(
+        `⭐ LEVEL UP! ${this.level}`
+      );
     }
   }
 
-  addCoins(amount) {
-    this.coins += amount;
+  /**
+   * 💰 Gold
+   */
+  addGold(amount) {
+    this.gold += amount;
   }
 
-  addCrystals(amount) {
-    this.crystals += amount;
+  spendGold(amount) {
+
+    if (this.gold < amount) {
+      return false;
+    }
+
+    this.gold -= amount;
+
+    return true;
   }
 
+  /**
+   * 🎒 Inventory
+   */
   addItem(item) {
     this.inventory.push(item);
   }
 
+  /**
+   * 🎨 Render
+   */
   render(ctx) {
 
-    // Shield Aura
-    if (this.isShielded) {
-      ctx.beginPath();
-      ctx.arc(
-        this.x + this.size / 2,
-        this.y + this.size / 2,
-        30,
-        0,
-        Math.PI * 2
-      );
-
-      ctx.strokeStyle = "#7dd3fc";
-      ctx.lineWidth = 3;
-      ctx.stroke();
-    }
-
     // Body
-    ctx.fillStyle = this.color;
+    ctx.fillStyle =
+      this.isShielded
+        ? "lightblue"
+        : this.color;
 
     ctx.fillRect(
       this.x,
@@ -157,7 +231,6 @@ export default class Player {
 
     // Border
     ctx.strokeStyle = "white";
-    ctx.lineWidth = 2;
 
     ctx.strokeRect(
       this.x,
@@ -166,8 +239,9 @@ export default class Player {
       this.size
     );
 
-    // HP
+    // HP Bar
     ctx.fillStyle = "red";
+
     ctx.fillRect(
       this.x,
       this.y - 15,
@@ -176,19 +250,23 @@ export default class Player {
     );
 
     ctx.fillStyle = "lime";
+
     ctx.fillRect(
       this.x,
       this.y - 15,
-      this.size * (this.hp / this.maxHP),
+      this.size *
+        (this.hp / this.maxHP),
       5
     );
 
-    // Mana
+    // Mana Bar
     ctx.fillStyle = "#38bdf8";
+
     ctx.fillRect(
       this.x,
       this.y - 22,
-      this.size * (this.mana / this.maxMana),
+      this.size *
+        (this.mana / this.maxMana),
       4
     );
 
