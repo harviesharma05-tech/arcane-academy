@@ -1,6 +1,6 @@
 /**
- * 🧙 Arcane Academy - NPC Entity
- * Phase 7
+ * 🧙 Arcane Academy - NPC
+ * VERSION 9
  */
 
 export default class NPC {
@@ -12,57 +12,105 @@ export default class NPC {
 
     // Visual
     this.size = 40;
-    this.color = "#7dd3fc";
+    this.color = "#facc15";
 
     // Info
     this.name = name;
 
+    // Interaction
+    this.interactionRange = 80;
+
     // Dialogue
     this.dialogues = [
       "Welcome to Arcane Academy!",
+      "Magic requires patience.",
       "Defeat enemies to gain XP.",
-      "Use SPACE to cast Fireball.",
-      "Use SHIFT to activate Shield."
+      "A dungeon portal has appeared!"
     ];
 
     this.currentDialogue = 0;
 
-    // Animation
-    this.floatOffset = 0;
+    // Quest
+    this.questGiven = false;
   }
 
   /**
    * 🔁 Update
    */
-  update() {
-    this.floatOffset =
-      Math.sin(Date.now() * 0.003) * 3;
-  }
-
-  /**
-   * 🗨 Next dialogue
-   */
-  nextDialogue() {
-    this.currentDialogue++;
-
-    if (this.currentDialogue >= this.dialogues.length) {
-      this.currentDialogue = 0;
-    }
-  }
-
-  /**
-   * 📍 Check interaction range
-   */
-  isNear(player) {
+  update(player) {
 
     const dx = player.x - this.x;
     const dy = player.y - this.y;
 
-    const distance = Math.sqrt(
-      dx * dx + dy * dy
+    this.distance =
+      Math.sqrt(dx * dx + dy * dy);
+  }
+
+  /**
+   * 💬 Interact
+   */
+  interact() {
+
+    const text =
+      this.dialogues[
+        this.currentDialogue
+      ];
+
+    this.currentDialogue++;
+
+    if (
+      this.currentDialogue >=
+      this.dialogues.length
+    ) {
+      this.currentDialogue = 0;
+    }
+
+    console.log(
+      `💬 ${this.name}: ${text}`
     );
 
-    return distance < 100;
+    return text;
+  }
+
+  /**
+   * 📜 Give Quest
+   */
+  giveQuest() {
+
+    if (this.questGiven) {
+      return null;
+    }
+
+    this.questGiven = true;
+
+    return {
+      id: "first_hunt",
+      title: "First Hunt",
+      description:
+        "Defeat 5 enemies.",
+      rewardXP: 100,
+      rewardGold: 50
+    };
+  }
+
+  /**
+   * 📏 Check Range
+   */
+  isPlayerNearby(player) {
+
+    const dx =
+      player.x - this.x;
+
+    const dy =
+      player.y - this.y;
+
+    const distance =
+      Math.sqrt(dx * dx + dy * dy);
+
+    return (
+      distance <
+      this.interactionRange
+    );
   }
 
   /**
@@ -70,82 +118,50 @@ export default class NPC {
    */
   render(ctx) {
 
-    // Floating animation
-    const drawY =
-      this.y + this.floatOffset;
-
     // Body
     ctx.fillStyle = this.color;
 
     ctx.fillRect(
       this.x,
-      drawY,
+      this.y,
       this.size,
       this.size
     );
 
     // Border
     ctx.strokeStyle = "white";
-    ctx.lineWidth = 2;
 
     ctx.strokeRect(
       this.x,
-      drawY,
+      this.y,
       this.size,
       this.size
     );
 
     // Name
     ctx.fillStyle = "white";
-    ctx.font = "14px Arial";
+
+    ctx.font = "12px Arial";
 
     ctx.fillText(
       this.name,
       this.x - 5,
-      drawY - 10
-    );
-  }
-
-  /**
-   * 💬 Render dialogue box
-   */
-  renderDialogue(ctx) {
-
-    ctx.fillStyle =
-      "rgba(0,0,0,0.8)";
-
-    ctx.fillRect(
-      200,
-      window.innerHeight - 120,
-      700,
-      80
+      this.y - 10
     );
 
-    ctx.strokeStyle = "#7dd3fc";
-    ctx.lineWidth = 2;
+    // Interaction Marker
+    ctx.fillStyle = "#7dd3fc";
 
-    ctx.strokeRect(
-      200,
-      window.innerHeight - 120,
-      700,
-      80
+    ctx.beginPath();
+
+    ctx.arc(
+      this.x + this.size / 2,
+      this.y - 20,
+      5,
+      0,
+      Math.PI * 2
     );
 
-    ctx.fillStyle = "white";
-    ctx.font = "20px Arial";
-
-    ctx.fillText(
-      `${this.name}: ${this.dialogues[this.currentDialogue]}`,
-      230,
-      window.innerHeight - 75
-    );
-
-    ctx.font = "14px Arial";
-
-    ctx.fillText(
-      "Press E to continue",
-      230,
-      window.innerHeight - 45
-    );
+    ctx.fill();
   }
 }
