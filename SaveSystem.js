@@ -1,62 +1,135 @@
 /**
- * 💾 Save System
+ * 💾 Arcane Academy - Save System
+ * VERSION 9
  */
 
 export default class SaveSystem {
+  constructor() {
+    this.saveKey = "arcaneAcademySave";
+  }
 
+  /**
+   * 💾 Save Game
+   */
   save(player) {
+    if (!player) return;
+
+    const saveData = {
+      level: player.level,
+      xp: player.xp,
+      xpToNextLevel: player.xpToNextLevel,
+
+      hp: player.hp,
+      maxHP: player.maxHP,
+
+      mana: player.mana,
+      maxMana: player.maxMana,
+
+      gold: player.gold,
+
+      x: player.x,
+      y: player.y,
+
+      dungeonFloor:
+        player.dungeonFloor || 1,
+
+      inventory:
+        player.inventory || [],
+
+      timestamp: Date.now()
+    };
 
     localStorage.setItem(
-      "arcaneSave",
-      JSON.stringify({
-
-        x: player.x,
-        y: player.y,
-
-        hp: player.hp,
-
-        mana: player.mana,
-
-        level: player.level,
-
-        xp: player.xp
-
-      })
+      this.saveKey,
+      JSON.stringify(saveData)
     );
 
-    console.log(
-      "💾 Saved"
-    );
-
+    console.log("💾 Game Saved");
   }
 
+  /**
+   * 📂 Load Game
+   */
   load(player) {
-
     const data =
       localStorage.getItem(
-        "arcaneSave"
+        this.saveKey
       );
 
-    if (!data) return;
+    if (!data) {
+      console.log(
+        "⚠️ No Save Found"
+      );
+      return false;
+    }
 
-    const save =
+    const saveData =
       JSON.parse(data);
 
-    player.x = save.x;
-    player.y = save.y;
+    player.level =
+      saveData.level || 1;
 
-    player.hp = save.hp;
+    player.xp =
+      saveData.xp || 0;
 
-    player.mana = save.mana;
+    player.xpToNextLevel =
+      saveData.xpToNextLevel || 100;
 
-    player.level = save.level;
+    player.hp =
+      saveData.hp || 100;
 
-    player.xp = save.xp;
+    player.maxHP =
+      saveData.maxHP || 100;
+
+    player.mana =
+      saveData.mana || 100;
+
+    player.maxMana =
+      saveData.maxMana || 100;
+
+    player.gold =
+      saveData.gold || 0;
+
+    player.x =
+      saveData.x || 150;
+
+    player.y =
+      saveData.y || 150;
+
+    player.dungeonFloor =
+      saveData.dungeonFloor || 1;
+
+    player.inventory =
+      saveData.inventory || [];
 
     console.log(
-      "📂 Loaded"
+      "📂 Save Loaded"
     );
 
+    return true;
   }
 
+  /**
+   * 🗑 Delete Save
+   */
+  deleteSave() {
+    localStorage.removeItem(
+      this.saveKey
+    );
+
+    console.log(
+      "🗑 Save Deleted"
+    );
+  }
+
+  /**
+   * ❓ Has Save?
+   */
+  hasSave() {
+    return (
+      localStorage.getItem(
+        this.saveKey
+      ) !== null
+    );
+  }
 }
