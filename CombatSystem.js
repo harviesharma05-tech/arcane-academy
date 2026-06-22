@@ -1,16 +1,20 @@
 /**
- * ⚔️ Arcane Academy - Combat System (V0.8.0)
- * Handles enemy defeat, XP rewards, gold rewards, quest progress and respawning
+ * ⚔️ Arcane Academy - Combat System
+ * Version 9
  */
 
 export default class CombatSystem {
-  constructor(player, enemy, questSystem = null, economySystem = null) {
-
+  constructor(
+    player,
+    enemy,
+    economySystem = null,
+    waveSystem = null
+  ) {
     this.player = player;
     this.enemy = enemy;
 
-    this.questSystem = questSystem;
     this.economySystem = economySystem;
+    this.waveSystem = waveSystem;
 
     this.killCount = 0;
   }
@@ -20,72 +24,103 @@ export default class CombatSystem {
    */
   update() {
 
-    // Enemy defeated
+    // Enemy dead
     if (this.enemy.hp <= 0) {
 
       this.killCount++;
 
-      // XP reward
-      this.player.gainXP(25);
-
-      // Gold reward
-      if (this.economySystem) {
-
-        const goldReward =
-          10 + Math.floor(Math.random() * 16);
-
-        this.economySystem.addGold(
-          goldReward
+      // XP Reward
+      if (this.player.gainXP) {
+        this.player.gainXP(
+          this.enemy.xpReward || 25
         );
       }
 
-      // Quest progress
-      if (this.questSystem) {
+      // Gold Reward
+      const gold =
+        this.enemy.goldReward || 20;
 
-        this.questSystem.enemyKilled();
+      if (
+        this.economySystem &&
+        this.economySystem.addGold
+      ) {
+        this.economySystem.addGold(
+          gold
+        );
+      }
+      else if (
+        this.player.addGold
+      ) {
+        this.player.addGold(
+          gold
+        );
+      }
 
+      // Wave System
+      if (
+        this.waveSystem &&
+        this.waveSystem.enemyKilled
+      ) {
+        this.waveSystem.enemyKilled();
       }
 
       console.log(
-        `👾 Enemy Defeated | Kills: ${this.killCount}`
+        `⚔️ Enemy Defeated | Kills: ${this.killCount}`
       );
 
-      // Respawn enemy
+      // Respawn Enemy
       this.enemy.hp =
         this.enemy.maxHP;
 
       this.enemy.x =
-        400 + Math.random() * 500;
+        300 +
+        Math.random() * 700;
 
       this.enemy.y =
-        100 + Math.random() * 400;
+        100 +
+        Math.random() * 400;
     }
   }
 
   /**
-   * 🎨 Render Combat Stats
+   * 🎨 Render
    */
   render(ctx) {
 
-    ctx.fillStyle = "white";
-    ctx.font = "16px Arial";
+    ctx.fillStyle =
+      "white";
+
+    ctx.font =
+      "14px Arial";
 
     ctx.fillText(
-      `👾 Kills: ${this.killCount}`,
+      `XP: ${this.player.xp}`,
+      20,
+      210
+    );
+
+    ctx.fillText(
+      `Kills: ${this.killCount}`,
+      20,
+      235
+    );
+
+    ctx.fillText(
+      `Enemy HP: ${Math.floor(
+        this.enemy.hp
+      )}`,
       20,
       260
     );
 
-    ctx.fillText(
-      `⭐ XP: ${this.player.xp}/${this.player.xpToNextLevel}`,
-      20,
-      285
-    );
-
-    ctx.fillText(
-      `❤️ Enemy HP: ${Math.floor(this.enemy.hp)}`,
-      20,
-      310
-    );
+    if (
+      this.player.gold !== undefined
+    ) {
+      ctx.fillText(
+        `Gold: ${this.player.gold}`,
+        20,
+        285
+      );
+    }
   }
 }
