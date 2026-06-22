@@ -1,19 +1,22 @@
 /**
  * 🪄 Arcane Academy - Core Game Engine
+ * VERSION 9
  */
 
 import Input from "./Input.js";
 import SceneManager from "./SceneManager.js";
 import GameState from "./GameState.js";
 import HUD from "./HUD.js";
+
 import AcademyScene from "./AcademyScene.js";
+import DungeonScene from "./DungeonScene.js";
 
 export default class Game {
   constructor(canvas) {
     this.canvas = canvas;
     this.ctx = canvas.getContext("2d");
 
-    // Core systems
+    // Core Systems
     this.input = new Input();
     this.sceneManager = new SceneManager();
     this.gameState = new GameState();
@@ -21,57 +24,102 @@ export default class Game {
 
     this.lastTime = 0;
 
-    // Create scene
-    const academyScene = new AcademyScene(this);
+    // Scenes
+    const academyScene =
+      new AcademyScene(this);
 
+    const dungeonScene =
+      new DungeonScene(this);
+
+    // Register Scenes
     this.sceneManager.addScene(
       "academy",
       academyScene
     );
 
-    this.sceneManager.start("academy");
+    this.sceneManager.addScene(
+      "dungeon",
+      dungeonScene
+    );
 
-    console.log("🪄 Arcane Academy Engine Started");
+    // Start Game
+    this.sceneManager.start(
+      "academy"
+    );
+
+    console.log(
+      "🪄 Arcane Academy V9 Started"
+    );
   }
 
   /**
-   * 🚀 Start game
+   * 🚀 Start Game
    */
   start() {
-    requestAnimationFrame(this.loop);
+    requestAnimationFrame(
+      this.loop
+    );
   }
 
   /**
    * 🔁 Main Loop
    */
   loop = (timestamp) => {
-    const deltaTime = timestamp - this.lastTime;
+
+    const deltaTime =
+      timestamp - this.lastTime;
+
     this.lastTime = timestamp;
 
     this.update(deltaTime);
     this.render();
 
-    requestAnimationFrame(this.loop);
+    requestAnimationFrame(
+      this.loop
+    );
   };
 
   /**
    * 🧠 Update
    */
   update(deltaTime) {
-    if (this.gameState.state === "paused") return;
-    if (this.gameState.state === "gameover") return;
 
-    this.sceneManager.update(deltaTime);
+    if (
+      this.gameState.state ===
+      "paused"
+    ) {
+      return;
+    }
 
-    if (this.gameState.update) {
+    if (
+      this.gameState.state ===
+      "gameover"
+    ) {
+      return;
+    }
+
+    // Scene
+    this.sceneManager.update(
+      deltaTime
+    );
+
+    // Game State
+    if (
+      this.gameState &&
+      this.gameState.update
+    ) {
       this.gameState.update();
     }
 
-    if (this.hud.update) {
+    // HUD
+    if (
+      this.hud &&
+      this.hud.update
+    ) {
       this.hud.update();
     }
 
-    // VERY IMPORTANT
+    // Reset one-frame keys
     this.input.update();
   }
 
@@ -79,6 +127,8 @@ export default class Game {
    * 🎨 Render
    */
   render() {
+
+    // Clear
     this.ctx.clearRect(
       0,
       0,
@@ -86,7 +136,10 @@ export default class Game {
       this.canvas.height
     );
 
-    this.ctx.fillStyle = "#0b0f1a";
+    // Background
+    this.ctx.fillStyle =
+      "#0b0f1a";
+
     this.ctx.fillRect(
       0,
       0,
@@ -94,8 +147,19 @@ export default class Game {
       this.canvas.height
     );
 
-    this.sceneManager.render(this.ctx);
+    // Active Scene
+    this.sceneManager.render(
+      this.ctx
+    );
 
-    this.hud.render(this.ctx);
+    // HUD
+    if (
+      this.hud &&
+      this.hud.render
+    ) {
+      this.hud.render(
+        this.ctx
+      );
+    }
   }
 }
