@@ -1,11 +1,13 @@
 /**
  * 🪄 Arcane Academy - Player Entity
- * VERSION 9
+ * VERSION 10
  */
+
+import SkillTreeSystem from "../systems/SkillTreeSystem.js";
+import EquipmentSystem from "../systems/EquipmentSystem.js";
 
 export default class Player {
   constructor(x, y) {
-
     // Position
     this.x = x;
     this.y = y;
@@ -35,7 +37,6 @@ export default class Player {
 
     // Combat
     this.attackPower = 10;
-    this.critChance = 5;
 
     // Dungeon
     this.dungeonFloor = 1;
@@ -45,6 +46,13 @@ export default class Player {
 
     // State
     this.isShielded = false;
+
+    // V10 Systems
+    this.skillTree =
+      new SkillTreeSystem(this);
+
+    this.equipment =
+      new EquipmentSystem();
   }
 
   /**
@@ -60,7 +68,6 @@ export default class Player {
    * ⌨️ Movement
    */
   handleMovement(input) {
-
     if (input.isDown("w")) {
       this.y -= this.speed;
     }
@@ -79,10 +86,9 @@ export default class Player {
   }
 
   /**
-   * 🧱 Boundaries
+   * 🧱 Screen Boundaries
    */
   applyBoundaries() {
-
     this.x = Math.max(
       0,
       Math.min(
@@ -104,9 +110,7 @@ export default class Player {
    * 🔋 Mana Regen
    */
   regenerateMana() {
-
     if (this.mana < this.maxMana) {
-
       this.mana += 0.05;
 
       if (this.mana > this.maxMana) {
@@ -116,9 +120,17 @@ export default class Player {
   }
 
   /**
-   * ❤️ Damage
+   * ❤️ Take Damage
    */
   takeDamage(amount) {
+    const defense =
+      this.getDefense();
+
+    amount -= defense;
+
+    if (amount < 1) {
+      amount = 1;
+    }
 
     if (this.isShielded) {
       amount *= 0.3;
@@ -135,7 +147,6 @@ export default class Player {
    * 💚 Heal
    */
   heal(amount) {
-
     this.hp += amount;
 
     if (this.hp > this.maxHP) {
@@ -144,10 +155,9 @@ export default class Player {
   }
 
   /**
-   * 🔵 Mana Use
+   * 🔵 Mana Usage
    */
   useMana(amount) {
-
     if (this.mana < amount) {
       return false;
     }
@@ -158,17 +168,17 @@ export default class Player {
   }
 
   /**
-   * ⭐ XP
+   * ⭐ Gain XP
    */
   gainXP(amount) {
-
     this.xp += amount;
 
     while (
-      this.xp >= this.xpToNextLevel
+      this.xp >=
+      this.xpToNextLevel
     ) {
-
-      this.xp -= this.xpToNextLevel;
+      this.xp -=
+        this.xpToNextLevel;
 
       this.level++;
 
@@ -176,9 +186,14 @@ export default class Player {
       this.maxMana += 20;
 
       this.hp = this.maxHP;
-      this.mana = this.maxMana;
+      this.mana =
+        this.maxMana;
 
       this.xpToNextLevel += 50;
+
+      // Skill Point
+      this.skillTree
+        .gainSkillPoint();
 
       console.log(
         `⭐ LEVEL UP! ${this.level}`
@@ -194,7 +209,6 @@ export default class Player {
   }
 
   spendGold(amount) {
-
     if (this.gold < amount) {
       return false;
     }
@@ -212,11 +226,37 @@ export default class Player {
   }
 
   /**
+   * ⚔️ Equip Item
+   */
+  equip(item) {
+    this.equipment.equip(item);
+  }
+
+  /**
+   * ⚔️ Attack Power
+   */
+  getAttackPower() {
+    let attack =
+      this.attackPower;
+
+    attack +=
+      this.equipment.getAttackBonus();
+
+    return attack;
+  }
+
+  /**
+   * 🛡 Defense
+   */
+  getDefense() {
+    return this.equipment
+      .getDefenseBonus();
+  }
+
+  /**
    * 🎨 Render
    */
   render(ctx) {
-
-    // Body
     ctx.fillStyle =
       this.isShielded
         ? "lightblue"
@@ -230,7 +270,10 @@ export default class Player {
     );
 
     // Border
-    ctx.strokeStyle = "white";
+    ctx.strokeStyle =
+      "white";
+
+    ctx.lineWidth = 2;
 
     ctx.strokeRect(
       this.x,
@@ -255,24 +298,30 @@ export default class Player {
       this.x,
       this.y - 15,
       this.size *
-        (this.hp / this.maxHP),
+        (this.hp /
+          this.maxHP),
       5
     );
 
     // Mana Bar
-    ctx.fillStyle = "#38bdf8";
+    ctx.fillStyle =
+      "#38bdf8";
 
     ctx.fillRect(
       this.x,
       this.y - 22,
       this.size *
-        (this.mana / this.maxMana),
+        (this.mana /
+          this.maxMana),
       4
     );
 
-    // Level
-    ctx.fillStyle = "white";
-    ctx.font = "12px Arial";
+    // Level Text
+    ctx.fillStyle =
+      "white";
+
+    ctx.font =
+      "12px Arial";
 
     ctx.fillText(
       `Lv ${this.level}`,
