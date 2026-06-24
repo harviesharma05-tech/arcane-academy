@@ -1,332 +1,479 @@
 /**
- * 🪄 Arcane Academy - Player Entity
- * VERSION 10
- */
 
-import SkillTreeSystem from "../systems/SkillTreeSystem.js";
-import EquipmentSystem from "../systems/EquipmentSystem.js";
+* 🪄 Arcane Academy - Player Entity
+* VERSION 11
+  */
+
+import SkillTreeSystem from "./SkillTreeSystem.js";
+import EquipmentSystem from "./EquipmentSystem.js";
 
 export default class Player {
-  constructor(x, y) {
-    // Position
-    this.x = x;
-    this.y = y;
+constructor(x, y) {
 
-    // Visual
-    this.size = 40;
-    this.color = "cyan";
 
-    // Movement
-    this.speed = 6;
+// Position
+this.x = x;
+this.y = y;
 
-    // Health
-    this.maxHP = 100;
-    this.hp = 100;
+// Visual
+this.size = 40;
+this.color = "cyan";
 
-    // Mana
-    this.maxMana = 100;
-    this.mana = 100;
+// Movement
+this.speed = 6;
 
-    // Progression
-    this.level = 1;
-    this.xp = 0;
-    this.xpToNextLevel = 100;
+// Health
+this.maxHP = 100;
+this.hp = 100;
 
-    // Economy
-    this.gold = 0;
+// Mana
+this.maxMana = 100;
+this.mana = 100;
 
-    // Combat
-    this.attackPower = 10;
+// Progression
+this.level = 1;
+this.xp = 0;
+this.xpToNextLevel = 100;
 
-    // Dungeon
-    this.dungeonFloor = 1;
+// Economy
+this.gold = 0;
 
-    // Inventory
-    this.inventory = [];
+// Combat
+this.attackPower = 10;
 
-    // State
-    this.isShielded = false;
+// Dungeon
+this.dungeonFloor = 1;
 
-    // V10 Systems
-    this.skillTree =
-      new SkillTreeSystem(this);
+// Inventory
+this.inventory = [];
 
-    this.equipment =
-      new EquipmentSystem();
-  }
+// State
+this.isShielded = false;
 
-  /**
-   * 🔁 Update
-   */
+// V10 Systems
+this.skillTree =
+  new SkillTreeSystem(this);
+
+this.equipment =
+  new EquipmentSystem();
+
+// V11 Systems Data
+this.bossKills = 0;
+
+this.activeQuests = [];
+this.completedQuests = [];
+
+this.achievements = [];
+
+
+}
+
+/**
+
+* 🔁 Update
+  */
   update(input) {
-    this.handleMovement(input);
-    this.regenerateMana();
-    this.applyBoundaries();
+  this.handleMovement(input);
+  this.regenerateMana();
+  this.applyBoundaries();
   }
 
-  /**
-   * ⌨️ Movement
-   */
+/**
+
+* ⌨️ Movement
+  */
   handleMovement(input) {
-    if (input.isDown("w")) {
-      this.y -= this.speed;
-    }
 
-    if (input.isDown("s")) {
-      this.y += this.speed;
-    }
+if (input.isDown("w")) {
 
-    if (input.isDown("a")) {
-      this.x -= this.speed;
-    }
+  this.y -= this.speed;
+}
 
-    if (input.isDown("d")) {
-      this.x += this.speed;
-    }
-  }
+if (input.isDown("s")) {
+  this.y += this.speed;
+}
 
-  /**
-   * 🧱 Screen Boundaries
-   */
+if (input.isDown("a")) {
+  this.x -= this.speed;
+}
+
+if (input.isDown("d")) {
+  this.x += this.speed;
+}
+
+
+}
+
+/**
+
+* 🧱 Screen Boundaries
+  */
   applyBoundaries() {
-    this.x = Math.max(
-      0,
-      Math.min(
-        window.innerWidth - this.size,
-        this.x
-      )
-    );
 
-    this.y = Math.max(
-      0,
-      Math.min(
-        window.innerHeight - this.size,
-        this.y
-      )
-    );
-  }
 
-  /**
-   * 🔋 Mana Regen
-   */
+this.x = Math.max(
+
+  0,
+  Math.min(
+    window.innerWidth - this.size,
+    this.x
+  )
+);
+
+this.y = Math.max(
+  0,
+  Math.min(
+    window.innerHeight - this.size,
+    this.y
+  )
+);
+
+}
+
+/**
+
+* 🔋 Mana Regen
+  */
   regenerateMana() {
-    if (this.mana < this.maxMana) {
-      this.mana += 0.05;
 
-      if (this.mana > this.maxMana) {
-        this.mana = this.maxMana;
-      }
-    }
+if (this.mana < this.maxMana) {
+
+  this.mana += 0.05;
+
+  if (this.mana > this.maxMana) {
+    this.mana = this.maxMana;
   }
+}
 
-  /**
-   * ❤️ Take Damage
-   */
+}
+
+/**
+
+* ❤️ Damage
+  */
   takeDamage(amount) {
-    const defense =
-      this.getDefense();
 
-    amount -= defense;
+const defense =
 
-    if (amount < 1) {
-      amount = 1;
-    }
+  this.getDefense();
 
-    if (this.isShielded) {
-      amount *= 0.3;
-    }
+amount -= defense;
 
-    this.hp -= amount;
+if (amount < 1) {
+  amount = 1;
+}
 
-    if (this.hp < 0) {
-      this.hp = 0;
-    }
-  }
+if (this.isShielded) {
+  amount *= 0.3;
+}
 
-  /**
-   * 💚 Heal
-   */
+this.hp -= amount;
+
+if (this.hp < 0) {
+  this.hp = 0;
+}
+
+}
+
+/**
+
+* 💚 Heal
+  */
   heal(amount) {
-    this.hp += amount;
 
-    if (this.hp > this.maxHP) {
-      this.hp = this.maxHP;
-    }
-  }
+this.hp += amount;
 
-  /**
-   * 🔵 Mana Usage
-   */
+if (this.hp > this.maxHP) {
+  this.hp = this.maxHP;
+}
+
+}
+
+/**
+
+* 🔵 Mana Use
+  */
   useMana(amount) {
-    if (this.mana < amount) {
-      return false;
-    }
 
-    this.mana -= amount;
+if (this.mana < amount) {
 
-    return true;
-  }
+  return false;
+}
 
-  /**
-   * ⭐ Gain XP
-   */
+this.mana -= amount;
+
+return true;
+
+}
+
+/**
+
+* ⭐ XP System
+  */
   gainXP(amount) {
-    this.xp += amount;
 
-    while (
-      this.xp >=
-      this.xpToNextLevel
-    ) {
-      this.xp -=
-        this.xpToNextLevel;
 
-      this.level++;
+this.xp += amount;
 
-      this.maxHP += 20;
-      this.maxMana += 20;
+while (
+  this.xp >=
+  this.xpToNextLevel
+) {
 
-      this.hp = this.maxHP;
-      this.mana =
-        this.maxMana;
+  this.xp -=
+    this.xpToNextLevel;
 
-      this.xpToNextLevel += 50;
+  this.level++;
 
-      // Skill Point
-      this.skillTree
-        .gainSkillPoint();
+  this.maxHP += 20;
+  this.maxMana += 20;
 
-      console.log(
-        `⭐ LEVEL UP! ${this.level}`
-      );
-    }
+  this.hp = this.maxHP;
+  this.mana = this.maxMana;
+
+  this.xpToNextLevel += 50;
+
+  if (this.skillTree) {
+    this.skillTree.gainSkillPoint();
   }
 
-  /**
-   * 💰 Gold
-   */
+  console.log(
+    `⭐ LEVEL UP! ${this.level}`
+  );
+}
+
+}
+
+/**
+
+* 💰 Gold
+  */
   addGold(amount) {
-    this.gold += amount;
+  this.gold += amount;
   }
 
-  spendGold(amount) {
-    if (this.gold < amount) {
-      return false;
-    }
+spendGold(amount) {
 
-    this.gold -= amount;
+if (this.gold < amount) {
+  return false;
+}
 
-    return true;
-  }
+this.gold -= amount;
 
-  /**
-   * 🎒 Inventory
-   */
+return true;
+
+}
+
+/**
+
+* 🎒 Inventory
+  */
   addItem(item) {
-    this.inventory.push(item);
+  this.inventory.push(item);
   }
 
-  /**
-   * ⚔️ Equip Item
-   */
+removeItem(itemName) {
+
+const index =
+  this.inventory.findIndex(
+    item =>
+      item.name === itemName
+  );
+
+if (index !== -1) {
+  this.inventory.splice(
+    index,
+    1
+  );
+}
+
+}
+
+/**
+
+* ⚔️ Equipment
+  */
   equip(item) {
-    this.equipment.equip(item);
-  }
 
-  /**
-   * ⚔️ Attack Power
-   */
+if (
+
+  this.equipment &&
+  this.equipment.equip
+) {
+  this.equipment.equip(item);
+}
+
+}
+
+/**
+
+* ⚔️ Attack
+  */
   getAttackPower() {
-    let attack =
-      this.attackPower;
 
-    attack +=
-      this.equipment.getAttackBonus();
+let attack =
 
-    return attack;
-  }
+  this.attackPower;
 
-  /**
-   * 🛡 Defense
-   */
+if (
+  this.equipment &&
+  this.equipment.getAttackBonus
+) {
+  attack +=
+    this.equipment.getAttackBonus();
+}
+
+return Math.floor(attack);
+
+}
+
+/**
+
+* 🛡 Defense
+  */
   getDefense() {
-    return this.equipment
-      .getDefenseBonus();
+
+
+if (
+
+  this.equipment &&
+  this.equipment.getDefenseBonus
+) {
+  return this.equipment.getDefenseBonus();
+}
+
+return 0;
+
+}
+
+/**
+
+* 📜 Quests
+  */
+  addQuest(quest) {
+  this.activeQuests.push(
+  quest
+  );
   }
 
-  /**
-   * 🎨 Render
-   */
+completeQuest(questId) {
+
+
+const quest =
+  this.activeQuests.find(
+    q => q.id === questId
+  );
+
+if (!quest) return;
+
+this.completedQuests.push(
+  quest
+);
+
+this.activeQuests =
+  this.activeQuests.filter(
+    q => q.id !== questId
+  );
+
+}
+
+/**
+
+* 🏆 Achievement
+  */
+  unlockAchievement(name) {
+
+
+if (
+
+
+  !this.achievements.includes(
+    name
+  )
+) {
+  this.achievements.push(
+    name
+  );
+}
+
+}
+
+/**
+
+* 🎨 Render
+  */
   render(ctx) {
-    ctx.fillStyle =
-      this.isShielded
-        ? "lightblue"
-        : this.color;
 
-    ctx.fillRect(
-      this.x,
-      this.y,
-      this.size,
-      this.size
-    );
+ctx.fillStyle =
+  
+  this.isShielded
+    ? "lightblue"
+    : this.color;
 
-    // Border
-    ctx.strokeStyle =
-      "white";
+ctx.fillRect(
+  this.x,
+  this.y,
+  this.size,
+  this.size
+);
 
-    ctx.lineWidth = 2;
+ctx.strokeStyle =
+  "white";
 
-    ctx.strokeRect(
-      this.x,
-      this.y,
-      this.size,
-      this.size
-    );
+ctx.lineWidth = 2;
 
-    // HP Bar
-    ctx.fillStyle = "red";
+ctx.strokeRect(
+  this.x,
+  this.y,
+  this.size,
+  this.size
+);
 
-    ctx.fillRect(
-      this.x,
-      this.y - 15,
-      this.size,
-      5
-    );
+// HP
+ctx.fillStyle = "red";
 
-    ctx.fillStyle = "lime";
+ctx.fillRect(
+  this.x,
+  this.y - 15,
+  this.size,
+  5
+);
 
-    ctx.fillRect(
-      this.x,
-      this.y - 15,
-      this.size *
-        (this.hp /
-          this.maxHP),
-      5
-    );
+ctx.fillStyle = "lime";
 
-    // Mana Bar
-    ctx.fillStyle =
-      "#38bdf8";
+ctx.fillRect(
+  this.x,
+  this.y - 15,
+  this.size *
+    (this.hp / this.maxHP),
+  5
+);
 
-    ctx.fillRect(
-      this.x,
-      this.y - 22,
-      this.size *
-        (this.mana /
-          this.maxMana),
-      4
-    );
+// Mana
+ctx.fillStyle =
+  "#38bdf8";
 
-    // Level Text
-    ctx.fillStyle =
-      "white";
+ctx.fillRect(
+  this.x,
+  this.y - 22,
+  this.size *
+    (this.mana /
+      this.maxMana),
+  4
+);
 
-    ctx.font =
-      "12px Arial";
+// Level
+ctx.fillStyle =
+  "white";
 
-    ctx.fillText(
-      `Lv ${this.level}`,
-      this.x,
-      this.y - 30
-    );
-  }
+ctx.font =
+  "12px Arial";
+
+ctx.fillText(
+  `Lv ${this.level}`,
+  this.x,
+  this.y - 30
+);
+
+}
 }
